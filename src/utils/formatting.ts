@@ -2,10 +2,10 @@ import { format } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 
 /**
- * Format a number as currency (USD)
+ * Format a number as currency
  */
-export function formatCurrency(amount: number): string {
-  return `$${amount.toFixed(2)}`;
+export function formatCurrency(amount: number, symbol: string = "$"): string {
+  return `${symbol}${amount.toFixed(2)}`;
 }
 
 /**

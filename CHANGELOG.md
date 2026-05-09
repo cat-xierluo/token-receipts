@@ -11,6 +11,9 @@
 - 模型定价模块（`src/utils/model-pricing.ts`）：内置每百万 token 价格，支持 USD/CNY 双币种
 - 自动保存到桌面/下载文件夹：HTML 收据生成后自动保存到 `~/Desktop/`（优先）或 `~/Downloads/`（降级）
 - 统一模型名称映射：自动去除日期后缀（如 `-20260509`），显示友好名称
+- 供应商 logo：收据根据主模型自动显示对应供应商的 ASCII logo（Anthropic/OpenAI/DeepSeek/GLM/MiniMax/Qwen）
+- 精确定价：从各供应商开放平台收集官方定价，支持 USD（Anthropic/OpenAI）和 CNY（DeepSeek/GLM/MiniMax/Qwen）双币种显示
+- 新增模型：GPT-5.5、GPT-5.4、GPT-5.4 Mini
 
 ### 变更
 

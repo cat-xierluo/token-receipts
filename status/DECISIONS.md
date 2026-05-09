@@ -1,6 +1,6 @@
 # 决策记录
 
-> Last updated: 2026-05-08
+> Last updated: 2026-05-09
 
 ## 决策记录
 
@@ -88,6 +88,20 @@
 ---
 
 ## 工作日志
+
+### 2026-05-09 13:40 (Claude)
+
+- **目标**：更新模型精确定价 + 添加供应商 logo
+- **操作**：
+  - 从各供应商开放平台收集官方定价数据（DeepSeek、GLM/智谱、MiniMax、Qwen/阿里云百炼、OpenAI）
+  - 更新 `model-pricing.ts`：DeepSeek 改为 CNY（v4-pro 3/6、v4-flash 1/2）；GLM-5.1 6/24；MiniMax M2.7 2.1/8.4；Qwen max 3.2/12.8、plus 0.8/2、turbo 0.3/0.6；新增 GPT-5.5/5.4/5.4-mini
+  - 新增 `getProvider()` 函数，根据 modelId 检测供应商
+  - 新增 `Provider` 类型：anthropic | openai | deepseek | glm | minimax | qwen | unknown
+  - 更新 `ascii-art.ts`：每个供应商独立 ASCII logo（GLM=│ GLM │、DeepSeek=│ D/S │等）
+  - 更新 `html-renderer.ts`：动态 logo + 动态供应商名（如 "GLM receipts"）
+  - 修复币种显示：`formatCurrency()` 支持 symbol 参数，各模型用各自币种（¥/$）
+- **结果**：收据正确显示供应商 logo + 正确币种（GLM 显示 ¥ 而非 $）
+- **下一步**：提交代码
 
 ### 2026-05-09 (Claude)
 

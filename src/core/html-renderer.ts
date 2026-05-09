@@ -5,7 +5,8 @@ import {
   formatDateTime,
   formatDuration,
 } from "../utils/formatting.js";
-import { getDisplayName } from "../utils/model-pricing.js";
+import { getDisplayName, getProvider, getCurrencySymbol } from "../utils/model-pricing.js";
+import type { Provider } from "../utils/model-pricing.js";
 
 // Shareable receipt data structure (matches worker/src/types.ts)
 export interface ShareableReceiptData {
@@ -33,6 +34,44 @@ export interface ShareableReceiptData {
 }
 
 const SHARE_API_URL = "https://receipts.chrishutchinson.dev";
+
+const PROVIDER_LOGOS: Record<Provider, string> = {
+  anthropic: ` ▐▛███▜▌
+ ▝▜█████▛▘
+ ▘▘ ▝▝`,
+  openai: ` ┌──○──┐
+ │  ⬡  │
+ └─────┘`,
+  deepseek: ` ╭─────╮
+ │ D/S │
+ ╰─────╯`,
+  glm: ` ┌─────┐
+ │ GLM │
+ └─────┘`,
+  minimax: ` ╭─────╮
+ │ M/M │
+ ╰─────╯`,
+  qwen: ` ┌─────┐
+ │ 通义 │
+ └─────┘`,
+  kimi: ` ┌─────┐
+ │ KIM │
+ └─────┘`,
+  unknown: ` ╭─────╮
+ │ AI  │
+ ╰─────╯`,
+};
+
+const PROVIDER_NAMES: Record<Provider, string> = {
+  anthropic: "Claude",
+  openai: "OpenAI",
+  deepseek: "DeepSeek",
+  glm: "GLM",
+  minimax: "MiniMax",
+  qwen: "Qwen",
+  kimi: "Kimi",
+  unknown: "AI",
+};
 
 export class HtmlRenderer {
   /**
@@ -69,6 +108,7 @@ export class HtmlRenderer {
    */
   generateHtml(data: ReceiptData, receiptText: string): string {
     const shareableData = this.getShareableData(data);
+    const mainProvider = this.getMainProvider(data);
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -404,10 +444,7 @@ export class HtmlRenderer {
   <div class="receipt-container">
     <div class="receipt">
       <div class="header">
-        <div class="logo"> ▐▛███▜▌
- ▝▜█████▛▘
- ▘▘ ▝▝
-</div>
+        <div class="logo">${PROVIDER_LOGOS[mainProvider]}</div>
         <div class="meta">
           <div class="meta-row">
             <div>Location</div><div class="dots">....................</div><div class="value">${this.escapeHtml(data.location)}</div>
@@ -428,7 +465,7 @@ export class HtmlRenderer {
       <div class="total-section">
         <div class="total">
           <span>TOTAL</span>
-          <span>${formatCurrency(data.sessionData.totalCost)}</span>
+          <span>${formatCurrency(data.sessionData.totalCost, mainProvider ? getCurrencySymbol(data.sessionData.modelBreakdowns?.[0]?.modelName ?? "") : "$")}</span>
         </div>
       </div>
 
@@ -436,7 +473,7 @@ export class HtmlRenderer {
         <div>CASHIER: ${this.getMainModel(data)}</div>
         <div class="footer-message">Thank you for building!</div>
         <div class="generated-by">
-          Print your own <strong>Claude receipts</strong> with<br>
+          Print your own <strong>${PROVIDER_NAMES[mainProvider]} receipts</strong> with<br>
           <a href="https://github.com/chrishutchinson/token-receipts" style="color: #333;">github.com/chrishutchinson/token-receipts</a>
         </div>
       </div>
@@ -484,7 +521,7 @@ ${JSON.stringify(shareableData, null, 2)}
     // Log receipt info
     console.log('Claude Receipt Generated!');
     console.log('Session:', '${this.escapeHtml(data.transcriptData.sessionSlug)}');
-    console.log('Cost:', '${formatCurrency(data.sessionData.totalCost)}');
+    console.log('Cost:', '${formatCurrency(data.sessionData.totalCost, getCurrencySymbol(data.sessionData.modelBreakdowns?.[0]?.modelName ?? ""))}');
     console.log('Press ESC to close');
 
     async function shareReceipt() {
@@ -584,10 +621,11 @@ ${JSON.stringify(shareableData, null, 2)}
       data.sessionData.modelBreakdowns.length > 0
     ) {
       for (const model of data.sessionData.modelBreakdowns) {
+        const sym = getCurrencySymbol(model.modelName);
         // Model name with its subtotal cost
         html += `<div class="model-header">
           <span class="model-name">${this.escapeHtml(this.getModelName(model.modelName))}</span>
-          <span class="model-cost">${formatCurrency(model.cost)}</span>
+          <span class="model-cost">${formatCurrency(model.cost, sym)}</span>
         </div>`;
 
         html += `<div class="line-item">
@@ -643,6 +681,22 @@ ${JSON.stringify(shareableData, null, 2)}
     }
 
     return "Claude";
+  }
+
+  /**
+   * Get the provider of the primary model
+   */
+  private getMainProvider(data: ReceiptData): Provider {
+    if (
+      data.sessionData.modelBreakdowns &&
+      data.sessionData.modelBreakdowns.length > 0
+    ) {
+      return getProvider(data.sessionData.modelBreakdowns[0].modelName);
+    }
+    if (data.sessionData.modelsUsed && data.sessionData.modelsUsed.length > 0) {
+      return getProvider(data.sessionData.modelsUsed[0]);
+    }
+    return "anthropic";
   }
 
   /**

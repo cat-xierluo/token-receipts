@@ -1,20 +1,41 @@
 /**
- * ASCII art headers for receipts
+ * ASCII art headers for receipts — one per provider
  */
 
-export const CLAUDE_LOGO = `     ▐▛███▜▌
+import type { Provider } from "./model-pricing.js";
+
+const LOGOS: Record<Provider, string> = {
+  anthropic: `     ▐▛███▜▌
     ▝▜█████▛▘
-      ▘▘ ▝▝   `;
+      ▘▘ ▝▝   `,
+  openai: `     ┌──○──┐
+     │  ⬡  │
+     └─────┘`,
+  deepseek: `     ╭─────╮
+     │ D/S │
+     ╰─────╯`,
+  glm: `     ┌─────┐
+     │ GLM │
+     └─────┘`,
+  minimax: `     ╭─────╮
+     │ M/M │
+     ╰─────╯`,
+  qwen: `     ┌─────┐
+     │ 通义 │
+     └─────┘`,
+  kimi: `     ┌─────┐
+     │ KIM │
+     └─────┘`,
+  unknown: `     ╭─────╮
+     │ AI  │
+     ╰─────╯`,
+};
 
-/**
- * Get the Claude logo
- */
-export function getHeader(): string {
-  return CLAUDE_LOGO;
+export function getHeader(provider: Provider = "anthropic"): string {
+  return LOGOS[provider] ?? LOGOS.unknown;
 }
 
-/**
- * Receipt section separators
- */
+export const CLAUDE_LOGO = LOGOS.anthropic;
+
 export const SEPARATOR = "━".repeat(35);
 export const LIGHT_SEPARATOR = "─".repeat(35);

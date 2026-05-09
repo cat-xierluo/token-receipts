@@ -8,7 +8,7 @@ import {
   formatDuration,
 } from "../utils/formatting.js";
 import { getHeader, SEPARATOR, LIGHT_SEPARATOR } from "../utils/ascii-art.js";
-import { getDisplayName } from "../utils/model-pricing.js";
+import { getDisplayName, getProvider, getCurrencySymbol } from "../utils/model-pricing.js";
 
 export interface ReceiptData {
   sessionData: CcusageSession;
@@ -24,9 +24,10 @@ export class ReceiptGenerator {
   generateReceipt(data: ReceiptData): string {
     const lines: string[] = [];
 
-    // Header
+    // Header — use logo from the primary model's provider
+    const mainProvider = this.getMainProvider(data.sessionData);
     lines.push(SEPARATOR);
-    lines.push(getHeader());
+    lines.push(getHeader(mainProvider));
     lines.push(SEPARATOR);
     lines.push("");
 
@@ -54,6 +55,7 @@ export class ReceiptGenerator {
       data.sessionData.modelBreakdowns.length > 0
     ) {
       for (const model of data.sessionData.modelBreakdowns) {
+        const sym = getCurrencySymbol(model.modelName);
         lines.push(this.getModelName(model.modelName));
 
         // Input tokens
@@ -65,6 +67,7 @@ export class ReceiptGenerator {
               model.inputTokens,
               model.cost,
               data.sessionData.totalTokens,
+              sym,
             ),
           ),
         );
@@ -78,6 +81,7 @@ export class ReceiptGenerator {
               model.outputTokens,
               model.cost,
               data.sessionData.totalTokens,
+              sym,
             ),
           ),
         );
@@ -92,6 +96,7 @@ export class ReceiptGenerator {
                 model.cacheCreationTokens,
                 model.cost,
                 data.sessionData.totalTokens,
+                sym,
               ),
             ),
           );
@@ -106,6 +111,7 @@ export class ReceiptGenerator {
                 model.cacheReadTokens,
                 model.cost,
                 data.sessionData.totalTokens,
+                sym,
               ),
             ),
           );
@@ -116,13 +122,16 @@ export class ReceiptGenerator {
     }
 
     // Totals
+    const totalSymbol = getCurrencySymbol(
+      data.sessionData.modelBreakdowns?.[0]?.modelName ?? "",
+    );
     lines.push(SEPARATOR);
     lines.push(
-      this.padLine("SUBTOTAL", "", formatCurrency(data.sessionData.totalCost)),
+      this.padLine("SUBTOTAL", "", formatCurrency(data.sessionData.totalCost, totalSymbol)),
     );
     lines.push(LIGHT_SEPARATOR);
     lines.push(
-      this.padLine("TOTAL", "", formatCurrency(data.sessionData.totalCost)),
+      this.padLine("TOTAL", "", formatCurrency(data.sessionData.totalCost, totalSymbol)),
     );
     lines.push(SEPARATOR);
     lines.push("");
@@ -204,10 +213,11 @@ export class ReceiptGenerator {
     tokens: number,
     modelCost: number,
     totalTokens: number,
+    symbol: string = "$",
   ): string {
     const proportion = tokens / totalTokens;
     const cost = modelCost * proportion;
-    return formatCurrency(cost);
+    return formatCurrency(cost, symbol);
   }
 
   /**
@@ -230,5 +240,18 @@ export class ReceiptGenerator {
     }
 
     return "Claude";
+  }
+
+  /**
+   * Get the provider of the primary model
+   */
+  private getMainProvider(sessionData: CcusageSession): ReturnType<typeof getProvider> {
+    if (sessionData.modelBreakdowns && sessionData.modelBreakdowns.length > 0) {
+      return getProvider(sessionData.modelBreakdowns[0].modelName);
+    }
+    if (sessionData.modelsUsed && sessionData.modelsUsed.length > 0) {
+      return getProvider(sessionData.modelsUsed[0]);
+    }
+    return "anthropic";
   }
 }
