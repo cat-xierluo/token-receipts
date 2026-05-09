@@ -4,7 +4,7 @@
 
 ## 项目概述
 
-**token-receipts** 是一个 NPM 包，为 Claude Code 使用会话生成精美的热敏打印机风格收据。它集成 Claude Code 的 SessionEnd hook，在编码会话结束时自动创建在浏览器中打开的 HTML 收据。
+**token-receipts** 是一个 NPM 包，为 AI 编程会话生成精美的热敏打印机风格收据。它支持多模型（Claude、DeepSeek、GLM、MiniMax、OpenAI、Qwen 等），直接从 session transcript 读取 token 用量数据，无需外部依赖。集成 Claude Code 的 SessionEnd hook，在编码会话结束时自动创建收据并保存到桌面。
 
 ## 开发命令
 
@@ -43,11 +43,11 @@ SessionEnd Hook
   ↓ (stdin 包含 session_id, transcript_path)
 GenerateCommand
   ↓
-DataFetcher (调用 ccusage CLI) + TranscriptParser (读取 JSONL)
+TranscriptDataFetcher (主路径：直接读取 JSONL) ← → DataFetcher (降级：调用 ccusage CLI)
   ↓
 ReceiptGenerator (创建文本) + HtmlRenderer (创建样式 HTML)
   ↓
-保存到 ~/.token-receipts/projects/[session-slug].html + 打开浏览器
+自动保存到 ~/Desktop/[slug].html + ~/.token-receipts/projects/[slug].html + 打开浏览器
 ```
 
 ### 核心组件
@@ -60,14 +60,16 @@ ReceiptGenerator (创建文本) + HtmlRenderer (创建样式 HTML)
 
 **核心逻辑** (`src/core/`)
 
-- `data-fetcher.ts` - 执行 `npx ccusage session --json --breakdown` 获取用量数据
-- `transcript-parser.ts` - 解析 `~/.claude/projects/[path].jsonl` 获取会话元数据（slug、时间戳、消息数量）
+- `transcript-data-fetcher.ts` - **主路径**：直接从 transcript JSONL 提取 token 用量，按模型聚合，计算费用
+- `data-fetcher.ts` - **降级路径**：执行 `npx ccusage session --json --breakdown` 获取用量数据（仅手动模式无 transcriptPath 时使用）
+- `transcript-parser.ts` - 解析 `~/.claude/projects/[path].jsonl` 获取会话元数据（slug、时间戳、消息数量）及 token usage
 - `receipt-generator.ts` - 创建带 Claude logo、位置、费用的 ASCII 文本收据
 - `html-renderer.ts` - 生成带嵌入式 CSS 的独立 HTML（热敏打印机美学）
 - `config-manager.ts` - 处理 `~/.token-receipts.config.json` 的读写
 
 **工具** (`src/utils/`)
 
+- `model-pricing.ts` - 模型定价表（每百万 token 价格）和费用计算，支持 Anthropic、OpenAI、DeepSeek、GLM、MiniMax、Qwen
 - `location.ts` - 位置检测链：CLI 参数 → 配置 → IP 地理定位（geoip-lite）→ 默认值
 - `formatting.ts` - 货币、数字、日期/时间、时长格式化
 - `ascii-art.ts` - Claude logo 和文本收据分隔符
@@ -81,7 +83,19 @@ ReceiptGenerator (创建文本) + HtmlRenderer (创建样式 HTML)
 - 来自 hook 时：直接使用 `transcript_path`，自动打开浏览器，无控制台输出
 - Hook 无法输出到控制台（会话结束后运行），因此采用 HTML + 浏览器方式
 
-**ccusage 数据格式**
+**Transcript 直读数据格式**
+
+- Transcript 文件位于 `~/.claude/projects/[project-path]/[session-id].jsonl`
+- Token 用量在 `message.usage` 内部（不是顶层 `usage`）：
+  - `message.usage.input_tokens` / `output_tokens`
+  - `message.usage.cache_read_input_tokens` / `cache_creation_input_tokens`
+- 模型信息在 `message.model`（包括非 Anthropic 模型：deepseek-v4-pro、glm-5.1 等）
+- 费用根据 `src/utils/model-pricing.ts` 中的定价表计算（`costUSD` 始终为 null）
+- `<synthetic>` 模型条目需要过滤
+- TranscriptDataFetcher 聚合所有 assistant 消息的 usage，按模型分组
+- 返回与 CcusageSession 兼容的结构，确保下游组件无感切换
+
+**ccusage 数据格式**（降级模式）
 
 - 实际字段名为驼峰命名：`sessionId`、`inputTokens`、`modelBreakdowns` 等
 - 会话 ID 较复杂；显示名称与实际 ID 不同
@@ -96,9 +110,10 @@ ReceiptGenerator (创建文本) + HtmlRenderer (创建样式 HTML)
 
 **输出模式**
 
-- `--output html`：保存到 `~/.token-receipts/projects/[slug].html`
+- `--output html`：保存到 `~/.token-receipts/projects/[slug].html`，并自动保存到桌面（优先）或下载文件夹（降级）
 - `--output console`：在终端显示 ASCII 艺术（手动模式的默认选项）
 - Hook 始终使用 `--output html`（设置时指定）
+- 自动保存路径检测：`~/Desktop/` 优先，`~/Downloads/` 降级
 
 **配置理念**
 
@@ -132,9 +147,9 @@ ReceiptGenerator (创建文本) + HtmlRenderer (创建样式 HTML)
 ## 已知限制
 
 - 无法从 SessionEnd hook 输出到控制台（终端已关闭）
-- 必须安装 ccusage（作为依赖打包）
-- 需要 ccusage 提供有效的 `projectPath` 才能找到 transcript
-- 会话数据有轻微延迟；ccusage 可能不会立即处理最新的会话
+- Hook 模式依赖 transcriptPath（由 Claude Code SessionEnd hook 提供）
+- 手动模式无 transcriptPath 时降级到 ccusage（需安装 ccusage）
+- 未在定价表中的模型费用显示为 $0.00
 - 浏览器自动打开使用平台特定命令（`open`、`start`、`xdg-open`）
 
 ## Hook 安装

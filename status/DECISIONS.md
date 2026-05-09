@@ -89,6 +89,16 @@
 
 ## 工作日志
 
+### 2026-05-09 (Claude)
+
+- **目标**：更新项目文档，反映多模型支持、Transcript 直读架构、自动保存和项目改名
+- **操作**：
+  - 更新 `CLAUDE.md`：项目概述增加多模型描述；数据流图增加 TranscriptDataFetcher 主路径；核心组件增加 transcript-data-fetcher.ts 和 model-pricing.ts；新增 Transcript 直读数据格式说明；更新输出路径含自动保存；已知限制改为 ccusage 可选降级
+  - 更新 `CHANGELOG.md`：在 [未发布] 中记录多模型支持、Transcript 直读、模型定价模块、自动保存、项目改名等变更
+  - 更新 `docs/ARCHITECTURE.md`：项目愿景增加多模型；阶段状态表中多模型标记为已完成；架构图增加 TranscriptDataFetcher 主路径和 ModelPricing；核心逻辑表增加 transcript-data-fetcher.ts 和 model-pricing.ts；数据流 Hook/手动模式更新为直读优先；设计决策增加直读替代、定价内置、自动保存三条
+- **结果**：四个文档全部更新完毕，准确反映当前架构
+- **下一步**：构建验证 + 提交
+
 ### 2026-05-08 22:30 (Claude)
 
 - **目标**：研究 session transcript 中是否包含 token usage 数据
