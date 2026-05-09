@@ -35,7 +35,7 @@ export class TranscriptParser {
 
     const firstUserMessage = userMessages[0];
     const firstPrompt = this.extractPromptText(firstUserMessage);
-    const sessionSlug = firstUserMessage?.slug || "unknown-session";
+    const sessionSlug = this.generateSlug(firstPrompt);
 
     // Calculate duration
     const timestamps = messages
@@ -189,5 +189,46 @@ export class TranscriptParser {
     }
 
     return text.substring(0, maxLength).trim() + "...";
+  }
+
+  /**
+   * Generate a session name from prompt text
+   */
+  private generateSlug(prompt: string): string {
+    if (!prompt || prompt === "No prompt available") {
+      return "untitled-session";
+    }
+
+    // Remove leading file paths (e.g., /Users/maoking/Desktop/file.html)
+    let cleaned = prompt
+      .replace(/^\/[^\s]+\s*/, "")
+      .trim();
+
+    if (!cleaned) {
+      return "untitled-session";
+    }
+
+    // Take the first sentence
+    const firstSentence = cleaned.split(/[。！？.!?\n]/)[0].trim();
+    cleaned = firstSentence || cleaned;
+
+    // Strip non-ASCII characters (keep only English letters, numbers, spaces, and basic punctuation)
+    cleaned = cleaned.replace(/[^\x20-\x7E]/g, "").trim();
+
+    if (!cleaned) {
+      return "untitled-session";
+    }
+
+    // Truncate to 30 chars
+    if (cleaned.length > 30) {
+      cleaned = cleaned.substring(0, 30).trim();
+    }
+
+    // Convert to slug: lowercase, replace spaces/special chars with hyphens
+    return cleaned
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      || "untitled-session";
   }
 }

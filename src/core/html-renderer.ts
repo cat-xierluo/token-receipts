@@ -5,11 +5,16 @@ import {
   formatDateTime,
   formatDuration,
 } from "../utils/formatting.js";
-import { getDisplayName, getProvider, getCurrencySymbol } from "../utils/model-pricing.js";
+import { PROVIDER_LOGOS } from "../utils/ascii-art.js";
+import {
+  getDisplayName,
+  getProvider,
+  getCurrencySymbol,
+} from "../utils/model-pricing.js";
 import type { Provider } from "../utils/model-pricing.js";
 
-// Shareable receipt data structure (matches worker/src/types.ts)
-export interface ShareableReceiptData {
+// Embedded receipt data used by the local PNG export button.
+export interface ReceiptExportData {
   sessionSlug: string;
   location: string;
   sessionDate: string;
@@ -33,51 +38,13 @@ export interface ShareableReceiptData {
   totalMessages: number;
 }
 
-const SHARE_API_URL = "https://receipts.chrishutchinson.dev";
-
-const PROVIDER_LOGOS: Record<Provider, string> = {
-  anthropic: ` ▐▛███▜▌
- ▝▜█████▛▘
- ▘▘ ▝▝`,
-  openai: ` ┌──○──┐
- │  ⬡  │
- └─────┘`,
-  deepseek: ` ╭─────╮
- │ D/S │
- ╰─────╯`,
-  glm: ` ┌─────┐
- │ GLM │
- └─────┘`,
-  minimax: ` ╭─────╮
- │ M/M │
- ╰─────╯`,
-  qwen: ` ┌─────┐
- │ 通义 │
- └─────┘`,
-  kimi: ` ┌─────┐
- │ KIM │
- └─────┘`,
-  unknown: ` ╭─────╮
- │ AI  │
- ╰─────╯`,
-};
-
-const PROVIDER_NAMES: Record<Provider, string> = {
-  anthropic: "Claude",
-  openai: "OpenAI",
-  deepseek: "DeepSeek",
-  glm: "GLM",
-  minimax: "MiniMax",
-  qwen: "Qwen",
-  kimi: "Kimi",
-  unknown: "AI",
-};
+const GITHUB_URL = "https://github.com/cat-xierluo/token-receipts";
 
 export class HtmlRenderer {
   /**
-   * Extract shareable data from receipt data (excludes sensitive fields)
+   * Extract browser-safe data for local image export.
    */
-  getShareableData(data: ReceiptData): ShareableReceiptData {
+  getExportData(data: ReceiptData): ReceiptExportData {
     return {
       sessionSlug: data.transcriptData.sessionSlug,
       location: data.location,
@@ -107,7 +74,7 @@ export class HtmlRenderer {
    * Generate HTML receipt with embedded CSS
    */
   generateHtml(data: ReceiptData, receiptText: string): string {
-    const shareableData = this.getShareableData(data);
+    const exportData = this.getExportData(data);
     const mainProvider = this.getMainProvider(data);
 
     return `<!DOCTYPE html>
@@ -144,7 +111,7 @@ export class HtmlRenderer {
     .receipt {
       background: #f8f8f8;
       width: 400px;
-      padding: 30px 20px;
+      padding: 45px 20px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
       position: relative;
       animation: slideIn 0.5s ease-out;
@@ -161,29 +128,29 @@ export class HtmlRenderer {
       }
     }
 
-    .receipt::before,
-    .receipt::after {
-      content: '';
+    .receipt-edge {
       position: absolute;
       left: 0;
       right: 0;
       height: 15px;
-      background: repeating-linear-gradient(
-        90deg,
-        transparent,
-        transparent 10px,
-        #f8f8f8 10px,
-        #f8f8f8 20px
-      );
+      overflow: hidden;
+      background: #3a3a3a;
     }
 
-    .receipt::before {
-      top: -15px;
-      left: -10px;
+    .receipt-edge-top {
+      top: 0;
     }
 
-    .receipt::after {
-      bottom: -15px;
+    .receipt-edge-bottom {
+      bottom: 0;
+    }
+
+    .receipt-edge .stripe {
+      position: absolute;
+      top: 0;
+      width: 10px;
+      height: 15px;
+      background: #f8f8f8;
     }
 
     .receipt-content {
@@ -329,14 +296,12 @@ export class HtmlRenderer {
       border-top: 1px dashed #999;
     }
 
-    .share-section {
+    .actions {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
+      justify-content: center;
     }
 
-    .share-btn {
+    .action-btn {
       background: #333;
       color: white;
       border: none;
@@ -351,78 +316,21 @@ export class HtmlRenderer {
       gap: 8px;
     }
 
-    .share-btn:hover {
+    .action-btn:hover {
       background: #000;
     }
 
-    .share-btn:disabled {
+    .action-btn:disabled {
       background: #666;
       cursor: not-allowed;
     }
 
-    .share-btn.success {
+    .action-btn.success {
       background: #2d5a27;
     }
 
-    .share-btn.error {
+    .action-btn.error {
       background: #8b2020;
-    }
-
-    .share-result {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      animation: fadeIn 0.3s ease-out;
-    }
-
-    .share-result.visible {
-      display: flex;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .share-url {
-      background: #f8f8f8;
-      padding: 10px 15px;
-      border-radius: 5px;
-      color: #333;
-      word-break: break-all;
-      max-width: 400px;
-      text-align: center;
-    }
-
-    .share-url a {
-      color: #333;
-      text-decoration: underline;
-    }
-
-    .copy-btn {
-      background: #333;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      font-family: 'Courier New', Courier, monospace;
-      cursor: pointer;
-      border-radius: 5px;
-      transition: background 0.3s;
-    }
-
-    .copy-btn:hover {
-      background: #000;
-    }
-
-    .copy-btn.copied {
-      background: #2d5a27;
-    }
-
-    .share-error {
-      color: #ff6b6b;
-      text-align: center;
-      max-width: 350px;
     }
 
     @media print {
@@ -434,7 +342,7 @@ export class HtmlRenderer {
         width: 100%;
       }
       .download-link,
-      .share-section {
+      .actions {
         display: none;
       }
     }
@@ -443,6 +351,7 @@ export class HtmlRenderer {
 <body>
   <div class="receipt-container">
     <div class="receipt">
+      <div class="receipt-edge receipt-edge-top" id="edge-top"></div>
       <div class="header">
         <div class="logo">${PROVIDER_LOGOS[mainProvider]}</div>
         <div class="meta">
@@ -473,43 +382,42 @@ export class HtmlRenderer {
         <div>CASHIER: ${this.getMainModel(data)}</div>
         <div class="footer-message">Thank you for building!</div>
         <div class="generated-by">
-          Print your own <strong>${PROVIDER_NAMES[mainProvider]} receipts</strong> with<br>
-          <a href="https://github.com/chrishutchinson/token-receipts" style="color: #333;">github.com/chrishutchinson/token-receipts</a>
+          Print your own <strong>token receipts</strong> with<br>
+          <a href="${GITHUB_URL}" style="color: #333;">github.com/cat-xierluo/token-receipts</a>
         </div>
       </div>
+      <div class="receipt-edge receipt-edge-bottom" id="edge-bottom"></div>
     </div>
 
-    <div class="share-section">
-      <button class="share-btn" id="share-btn" onclick="shareReceipt()">
+    <div class="actions">
+      <button class="action-btn" id="save-img-btn" onclick="saveAsImage('png')">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="18" cy="5" r="3"></circle>
-          <circle cx="6" cy="12" r="3"></circle>
-          <circle cx="18" cy="19" r="3"></circle>
-          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
         </svg>
-        <span id="share-btn-text">Share Publicly</span>
+        <span id="save-img-btn-text">Save PNG</span>
       </button>
-
-      <div class="share-result" id="share-result">
-        <div class="share-url" id="share-url"></div>
-        <button class="copy-btn" id="copy-btn" onclick="copyShareLink()">
-          Copy Link
-        </button>
-      </div>
-
-      <div class="share-error" id="share-error"></div>
     </div>
   </div>
 
-  <!-- Embedded receipt data for sharing -->
+  <!-- Embedded receipt data for local image export -->
   <script id="receipt-data" type="application/json">
-${JSON.stringify(shareableData, null, 2)}
+${JSON.stringify(exportData, null, 2)}
   </script>
 
   <script>
-    const SHARE_API_URL = '${SHARE_API_URL}';
-    let sharedUrl = null;
+    // Generate piano-key stripes for receipt edges
+    function fillEdgeStripes(el, offset) {
+      if (!el) return;
+      let html = '';
+      for (let x = offset; x < 460; x += 20) {
+        html += '<div class="stripe" style="left:' + x + 'px"></div>';
+      }
+      el.innerHTML = html;
+    }
+    fillEdgeStripes(document.getElementById('edge-top'), 0);
+    fillEdgeStripes(document.getElementById('edge-bottom'), 10);
 
     // Add keyboard shortcut to close window
     document.addEventListener('keydown', (e) => {
@@ -523,86 +431,39 @@ ${JSON.stringify(shareableData, null, 2)}
     console.log('Session:', '${this.escapeHtml(data.transcriptData.sessionSlug)}');
     console.log('Cost:', '${formatCurrency(data.sessionData.totalCost, getCurrencySymbol(data.sessionData.modelBreakdowns?.[0]?.modelName ?? ""))}');
     console.log('Press ESC to close');
+  </script>
 
-    async function shareReceipt() {
-      const btn = document.getElementById('share-btn');
-      const btnText = document.getElementById('share-btn-text');
-      const resultDiv = document.getElementById('share-result');
-      const urlDiv = document.getElementById('share-url');
-      const errorDiv = document.getElementById('share-error');
-
-      // Reset state
-      resultDiv.classList.remove('visible');
-      errorDiv.textContent = '';
-      errorDiv.style.display = 'none';
-
-      // Get receipt data
-      const dataScript = document.getElementById('receipt-data');
-      const receiptData = JSON.parse(dataScript.textContent);
-
-      // Disable button and show loading
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+  <script>
+    async function saveAsImage(format) {
+      const btn = document.getElementById('save-img-btn');
+      const btnText = document.getElementById('save-img-btn-text');
       btn.disabled = true;
-      btnText.textContent = 'Sharing...';
+      btnText.textContent = 'Saving...';
 
       try {
-        const response = await fetch(SHARE_API_URL + '/api/receipts', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(receiptData),
+        const receipt = document.querySelector('.receipt');
+        const dataUrl = await htmlToImage.toPng(receipt, {
+          quality: 1,
+          pixelRatio: 3,
+          backgroundColor: '#ffffff',
+          style: { boxShadow: 'none', animation: 'none' },
         });
 
-        const result = await response.json();
+        const link = document.createElement('a');
+        link.download = '${this.escapeHtml(data.transcriptData.sessionSlug)}.' + format;
+        link.href = dataUrl;
+        link.click();
 
-        if (!response.ok) {
-          throw new Error(result.message || result.error || 'Failed to share receipt');
-        }
-
-        // Success
-        sharedUrl = result.url;
-        urlDiv.innerHTML = '<a href="' + sharedUrl + '" target="_blank">' + sharedUrl + '</a>';
-        resultDiv.classList.add('visible');
-
+        btnText.textContent = 'Saved!';
         btn.classList.add('success');
-        btnText.textContent = 'Shared!';
-
-        // Keep button disabled since already shared
-        console.log('Receipt shared:', sharedUrl);
-
-      } catch (error) {
-        console.error('Share error:', error);
-
+        setTimeout(() => { btn.disabled = false; btn.classList.remove('success'); btnText.textContent = 'Save PNG'; }, 2000);
+      } catch (err) {
+        console.error('Save image failed:', err);
+        btnText.textContent = 'Failed';
         btn.classList.add('error');
-        btnText.textContent = 'Share Failed';
-        errorDiv.textContent = error.message;
-        errorDiv.style.display = 'block';
-
-        // Re-enable button after error
-        setTimeout(() => {
-          btn.disabled = false;
-          btn.classList.remove('error');
-          btnText.textContent = 'Share Publicly';
-        }, 3000);
+        setTimeout(() => { btn.disabled = false; btn.classList.remove('error'); btnText.textContent = 'Save PNG'; }, 2000);
       }
-    }
-
-    function copyShareLink() {
-      if (!sharedUrl) return;
-
-      const copyBtn = document.getElementById('copy-btn');
-
-      navigator.clipboard.writeText(sharedUrl).then(() => {
-        copyBtn.classList.add('copied');
-        copyBtn.textContent = 'Copied!';
-
-        setTimeout(() => {
-          copyBtn.classList.remove('copied');
-          copyBtn.textContent = 'Copy Link';
-        }, 2000);
-      }).catch(err => {
-        console.error('Copy failed:', err);
-      });
     }
   </script>
 </body>

@@ -216,7 +216,7 @@ export class GenerateCommand {
     sessionSlug: string | undefined,
     isFromHook: boolean,
   ): Promise<void> {
-    const fileName = sessionSlug || sessionId;
+    const fileName = this.sanitizeFileName(sessionSlug || sessionId);
     const home = homedir();
     const html = this.htmlRenderer.generateHtml(receiptData, receipt);
 
@@ -383,5 +383,16 @@ export class GenerateCommand {
       return path.replace(/^~/, home);
     }
     return path;
+  }
+
+  /**
+   * Sanitize a string for use as a file name
+   */
+  private sanitizeFileName(name: string): string {
+    return name
+      .replace(/[/\\:*?"<>|]/g, "-")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .substring(0, 60);
   }
 }
