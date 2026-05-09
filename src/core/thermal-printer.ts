@@ -13,7 +13,7 @@ const execAsync = promisify(exec);
 const WIDTH = 40; // TM-T88V 80mm paper, Font A minus margin
 const LEFT_MARGIN_DOTS = 12; // 1 character width at 203 dpi
 
-const REPO_URL = "https://github.com/chrishutchinson/token-receipts";
+const REPO_URL = "https://github.com/cat-xierluo/token-receipts";
 
 // Epson USB vendor ID
 const EPSON_VENDOR_ID = 0x04b8;
@@ -203,9 +203,8 @@ export class ThermalPrinterRenderer {
   async printReceipt(
     data: ReceiptData,
     printerInterface: string,
-    shareUrl?: string,
   ): Promise<void> {
-    const buffer = this.buildReceipt(data, shareUrl);
+    const buffer = this.buildReceipt(data);
 
     if (printerInterface.startsWith("tcp://")) {
       await this.sendViaTcp(buffer, printerInterface);
@@ -222,7 +221,7 @@ export class ThermalPrinterRenderer {
   /**
    * Build the full ESC/POS receipt buffer.
    */
-  private buildReceipt(data: ReceiptData, shareUrl?: string): Buffer {
+  private buildReceipt(data: ReceiptData): Buffer {
     const b = new EscPosBuilder();
 
     b.init();
@@ -292,9 +291,9 @@ export class ThermalPrinterRenderer {
 
     // --- Repo QR code ---
     b.align("center");
-    b.line("Print your own Claude receipts:");
+    b.line("Print your own token receipts:");
     b.qrCode(REPO_URL, 4);
-    b.line("github.com/chrishutchinson");
+    b.line("github.com/cat-xierluo");
     b.line("/token-receipts");
     b.line();
 

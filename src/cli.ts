@@ -9,7 +9,7 @@ const program = new Command();
 
 program
   .name("token-receipts")
-  .description("Generate quirky, shareable receipts for your Claude Code usage")
+  .description("Generate thermal-style receipts for your Claude Code usage")
   .version("1.0.0");
 
 // Generate command
