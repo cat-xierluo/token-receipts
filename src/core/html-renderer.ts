@@ -311,8 +311,8 @@ ${JSON.stringify(exportData, null, 2)}
     const isToday = summary.date === new Date().toISOString().slice(0, 10);
     const dayEnd = isToday ? new Date() : new Date(y, m - 1, d, 23, 59);
     const durationStr = this.formatDayDuration(dayStart, dayEnd);
-    const timeStart = "00:00";
-    const timeEnd = dayEnd.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+    const timeStart = `${summary.date} 00:00`;
+    const timeEnd = `${summary.date} ${dayEnd.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })}`;
 
     return `<!DOCTYPE html>
 <html lang="en">

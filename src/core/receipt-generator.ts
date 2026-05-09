@@ -288,7 +288,7 @@ export class ReceiptGenerator {
       ),
     );
     lines.push(
-      this.centerText(`00:00 ~ ${timeEnd}`, 35),
+      this.centerText(`${summary.date} 00:00 ~ ${timeEnd}`, 35),
     );
     lines.push(this.centerText(`Location: ${location}`, 35));
     lines.push("");
