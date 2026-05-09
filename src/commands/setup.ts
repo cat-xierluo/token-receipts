@@ -120,7 +120,7 @@ export class SetupCommand {
       }
       if (outputs.includes("printer")) {
         tips.push(
-          "Receipts will be sent to your thermal printer (configure with: claude-receipts config --set printer=<name>)",
+          "Receipts will be sent to your thermal printer (configure with: token-receipts config --set printer=<name>)",
         );
       }
       console.log(chalk.cyan(tips.join("\n") + "\n"));
@@ -190,9 +190,9 @@ export class SetupCommand {
     }
 
     // Check if our hook already exists
-    const hookCommand = "npx claude-receipts@latest generate";
+    const hookCommand = "npx token-receipts@latest generate";
     const existingHook = settings.hooks.SessionEnd.find((h) =>
-      h.hooks.some((hook) => hook.command.includes("claude-receipts")),
+      h.hooks.some((hook) => hook.command.includes("token-receipts")),
     );
 
     if (existingHook) {
@@ -200,7 +200,7 @@ export class SetupCommand {
       // Remove old hook
       settings.hooks.SessionEnd = settings.hooks.SessionEnd.filter(
         (h) =>
-          !h.hooks.some((hook) => hook.command.includes("claude-receipts")),
+          !h.hooks.some((hook) => hook.command.includes("token-receipts")),
       );
     }
 
@@ -246,7 +246,7 @@ export class SetupCommand {
 
     // Remove our hook
     settings.hooks.SessionEnd = settings.hooks.SessionEnd.filter(
-      (h) => !h.hooks.some((hook) => hook.command.includes("claude-receipts")),
+      (h) => !h.hooks.some((hook) => hook.command.includes("token-receipts")),
     );
 
     // Remove SessionEnd array if empty

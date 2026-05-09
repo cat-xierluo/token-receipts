@@ -13,7 +13,7 @@ const execAsync = promisify(exec);
 const WIDTH = 40; // TM-T88V 80mm paper, Font A minus margin
 const LEFT_MARGIN_DOTS = 12; // 1 character width at 203 dpi
 
-const REPO_URL = "https://github.com/chrishutchinson/claude-receipts";
+const REPO_URL = "https://github.com/chrishutchinson/token-receipts";
 
 // Epson USB vendor ID
 const EPSON_VENDOR_ID = 0x04b8;
@@ -295,7 +295,7 @@ export class ThermalPrinterRenderer {
     b.line("Print your own Claude receipts:");
     b.qrCode(REPO_URL, 4);
     b.line("github.com/chrishutchinson");
-    b.line("/claude-receipts");
+    b.line("/token-receipts");
     b.line();
 
     // --- Cut ---

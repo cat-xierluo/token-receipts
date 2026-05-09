@@ -397,7 +397,7 @@ export function generatePublicReceiptHtml(
         <div class="footer-message">Thank you for building!</div>
         <div class="generated-by">
           Print your own <strong>Claude receipts</strong> with<br>
-          <a href="https://github.com/chrishutchinson/claude-receipts">github.com/chrishutchinson/claude-receipts</a>
+          <a href="https://github.com/chrishutchinson/token-receipts">github.com/chrishutchinson/token-receipts</a>
         </div>
       </div>
     </div>
@@ -473,7 +473,7 @@ export function generate404Html(): string {
     <h1>404</h1>
     <p>This receipt was not found or has been removed.</p>
     <p>Generate your own receipts at<br>
-    <a href="https://github.com/chrishutchinson/claude-receipts">github.com/chrishutchinson/claude-receipts</a></p>
+    <a href="https://github.com/chrishutchinson/token-receipts">github.com/chrishutchinson/token-receipts</a></p>
   </div>
 </body>
 </html>`;

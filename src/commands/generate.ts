@@ -190,7 +190,7 @@ export class GenerateCommand {
     const printerInterface = options.printer || config.printer;
     if (!printerInterface) {
       throw new Error(
-        'No printer specified. Use --printer <name> or set via: claude-receipts config --set printer=EPSON_TM_T88V',
+        'No printer specified. Use --printer <name> or set via: token-receipts config --set printer=EPSON_TM_T88V',
       );
     }
 
@@ -211,7 +211,7 @@ export class GenerateCommand {
   ): Promise<void> {
     const fileName = sessionSlug || sessionId;
     const home = process.env.HOME || process.env.USERPROFILE || "";
-    const outputDir = `${home}/.claude-receipts/projects`;
+    const outputDir = `${home}/.token-receipts/projects`;
     const fullPath = `${outputDir}/${fileName}.html`;
 
     const html = this.htmlRenderer.generateHtml(receiptData, receipt);

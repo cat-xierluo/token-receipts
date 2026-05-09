@@ -1,145 +1,145 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+本文件为 Claude Code (claude.ai/code) 在此仓库中工作时提供指导。
 
-## Project Overview
+## 项目概述
 
-**claude-receipts** is an NPM package that generates beautiful thermal printer-style receipts for Claude Code usage sessions. It integrates with Claude Code's SessionEnd hook to automatically create HTML receipts that open in the browser when a coding session ends.
+**token-receipts** 是一个 NPM 包，为 Claude Code 使用会话生成精美的热敏打印机风格收据。它集成 Claude Code 的 SessionEnd hook，在编码会话结束时自动创建在浏览器中打开的 HTML 收据。
 
-## Development Commands
+## 开发命令
 
 ```bash
-# Build TypeScript to JavaScript
+# 将 TypeScript 编译为 JavaScript
 npm run build
 
-# Watch mode for development
+# 开发模式（监听）
 npm run dev
 
-# Test the CLI locally (after building)
-node bin/claude-receipts.js generate
-node bin/claude-receipts.js generate --output html
-node bin/claude-receipts.js config --show
-node bin/claude-receipts.js setup
+# 本地测试 CLI（编译后）
+node bin/token-receipts.js generate
+node bin/token-receipts.js generate --output html
+node bin/token-receipts.js config --show
+node bin/token-receipts.js setup
 
-# Install locally for testing as if installed globally
+# 本地链接以便测试（如同全局安装）
 npm link
-claude-receipts generate
+token-receipts generate
 
-# Prepare for publishing
-npm run prepublishOnly  # Runs build automatically
+# 准备发布
+npm run prepublishOnly  # 自动运行 build
 ```
 
-## Architecture
+## 架构
 
-### Data Flow
+### 数据流
 
-The package operates in two modes:
+包有两种运行模式：
 
-1. **Hook Mode** (automatic): SessionEnd hook → stdin JSON → generate HTML → open browser
-2. **Manual Mode**: CLI command → fetch recent session → output to console/HTML
+1. **Hook 模式**（自动）：SessionEnd hook → stdin JSON → 生成 HTML → 打开浏览器
+2. **手动模式**：CLI 命令 → 获取最近会话 → 输出到终端/HTML
 
 ```
 SessionEnd Hook
-  ↓ (stdin with session_id, transcript_path)
+  ↓ (stdin 包含 session_id, transcript_path)
 GenerateCommand
   ↓
-DataFetcher (calls ccusage CLI) + TranscriptParser (reads JSONL)
+DataFetcher (调用 ccusage CLI) + TranscriptParser (读取 JSONL)
   ↓
-ReceiptGenerator (creates text) + HtmlRenderer (creates styled HTML)
+ReceiptGenerator (创建文本) + HtmlRenderer (创建样式 HTML)
   ↓
-Save to ~/.claude-receipts/projects/[session-slug].html + open browser
+保存到 ~/.token-receipts/projects/[session-slug].html + 打开浏览器
 ```
 
-### Key Components
+### 核心组件
 
-**Commands** (`src/commands/`)
+**命令** (`src/commands/`)
 
-- `generate.ts` - Main command; auto-detects if called from hook via stdin
-- `setup.ts` - Modifies `~/.claude/settings.json` to install SessionEnd hook
-- `config.ts` - Manages user configuration at `~/.claude-receipts.config.json`
+- `generate.ts` - 主命令；通过 stdin 检测是否来自 hook
+- `setup.ts` - 修改 `~/.claude/settings.json` 安装 SessionEnd hook
+- `config.ts` - 管理 `~/.token-receipts.config.json` 用户配置
 
-**Core Logic** (`src/core/`)
+**核心逻辑** (`src/core/`)
 
-- `data-fetcher.ts` - Executes `npx ccusage session --json --breakdown` to get usage data
-- `transcript-parser.ts` - Parses `~/.claude/projects/[path].jsonl` for session metadata (slug, timestamps, message counts)
-- `receipt-generator.ts` - Creates ASCII text receipt with Claude logo, location, costs
-- `html-renderer.ts` - Generates standalone HTML with embedded CSS (thermal printer aesthetic)
-- `config-manager.ts` - Handles `~/.claude-receipts.config.json` I/O
+- `data-fetcher.ts` - 执行 `npx ccusage session --json --breakdown` 获取用量数据
+- `transcript-parser.ts` - 解析 `~/.claude/projects/[path].jsonl` 获取会话元数据（slug、时间戳、消息数量）
+- `receipt-generator.ts` - 创建带 Claude logo、位置、费用的 ASCII 文本收据
+- `html-renderer.ts` - 生成带嵌入式 CSS 的独立 HTML（热敏打印机美学）
+- `config-manager.ts` - 处理 `~/.token-receipts.config.json` 的读写
 
-**Utils** (`src/utils/`)
+**工具** (`src/utils/`)
 
-- `location.ts` - Location detection chain: CLI flag → config → IP geolocation (geoip-lite) → fallback
-- `formatting.ts` - Currency, number, date/time, duration formatting
-- `ascii-art.ts` - Claude logo and separators for text receipts
+- `location.ts` - 位置检测链：CLI 参数 → 配置 → IP 地理定位（geoip-lite）→ 默认值
+- `formatting.ts` - 货币、数字、日期/时间、时长格式化
+- `ascii-art.ts` - Claude logo 和文本收据分隔符
 
-### Critical Implementation Details
+### 关键实现细节
 
-**SessionEnd Hook Integration**
+**SessionEnd Hook 集成**
 
-- Hook receives JSON via stdin: `{session_id, transcript_path, cwd, ...}`
-- `GenerateCommand.readStdinIfAvailable()` checks `stdin.isTTY` (false = piped from hook)
-- When from hook: uses `transcript_path` directly, auto-opens browser, no console output
-- Hook cannot output to console (runs after session closes), hence HTML + browser approach
+- Hook 通过 stdin 接收 JSON：`{session_id, transcript_path, cwd, ...}`
+- `GenerateCommand.readStdinIfAvailable()` 检查 `stdin.isTTY`（false = 来自 hook）
+- 来自 hook 时：直接使用 `transcript_path`，自动打开浏览器，无控制台输出
+- Hook 无法输出到控制台（会话结束后运行），因此采用 HTML + 浏览器方式
 
-**ccusage Data Format**
+**ccusage 数据格式**
 
-- Actual field names are camelCase: `sessionId`, `inputTokens`, `modelBreakdowns`, etc.
-- Session IDs are complex; display names differ from actual IDs
-- `projectPath` format: `"project-name/actual-session-id"` - split to get session ID
-- Only sessions with valid `projectPath` (not "Unknown Project") are usable
+- 实际字段名为驼峰命名：`sessionId`、`inputTokens`、`modelBreakdowns` 等
+- 会话 ID 较复杂；显示名称与实际 ID 不同
+- `projectPath` 格式：`"project-name/actual-session-id"` - 通过分割获取会话 ID
+- 只有具有有效 `projectPath`（不是 "Unknown Project"）的会话才可用
 
-**File Naming**
+**文件命名**
 
-- HTML files use session slug (e.g., `quirky-crafting-floyd.html`), not session ID
-- Session slug comes from first user message in transcript JSONL
-- Fallback to session ID if slug unavailable
+- HTML 文件使用会话 slug（例如 `quirky-crafting-floyd.html`），而不是会话 ID
+- Session slug 来自 transcript JSONL 中的第一条用户消息
+- 如果 slug 不可用，则回退到会话 ID
 
-**Output Modes**
+**输出模式**
 
-- `--output html`: Save to `~/.claude-receipts/projects/[slug].html`
-- `--output console`: Display ASCII art in terminal (default for manual use)
-- Hook always uses `--output html` (set during setup)
+- `--output html`：保存到 `~/.token-receipts/projects/[slug].html`
+- `--output console`：在终端显示 ASCII 艺术（手动模式的默认选项）
+- Hook 始终使用 `--output html`（设置时指定）
 
-**Config Philosophy**
+**配置理念**
 
-- Minimal config: only `version`, optional `location`, optional `timezone`
-- No `outputDirectory`, `enablePNG`, `enableConsole`, `format` - simplified after initial design
-- Output format specified at command level, not config level
+- 最小化配置：仅 `version`、可选的 `location`、可选的 `timezone`
+- 无 `outputDirectory`、`enablePNG`、`enableConsole`、`format` - 初始设计简化后移除
+- 输出格式在命令级指定，而非配置级
 
-**Visual Design**
+**视觉设计**
 
-- Black & white thermal printer aesthetic (no color backgrounds except dark page background)
-- Claude ASCII logo (not "shop" names with emojis)
-- "Thank you for building!" (not "shopping")
-- Dark page background (#3a3a3a) makes white receipt pop
+- 黑白热敏打印机美学（除深色页面背景外无彩色背景）
+- Claude ASCII logo（非带表情符号的"商店"名）
+- "Thank you for building!"（非"购物"相关）
+- 深色页面背景（#3a3a3a）使白色收据突出
 
-## Type System
+## 类型系统
 
-All types in `src/types/`:
+所有类型位于 `src/types/`：
 
-- `ccusage.ts` - Matches actual ccusage CLI JSON output (camelCase fields)
-- `transcript.ts` - JSONL message structure and parsed summary
-- `config.ts` - Minimal user configuration
-- `session-hook.ts` - SessionEnd stdin JSON format
+- `ccusage.ts` - 匹配 ccusage CLI 实际 JSON 输出（驼峰命名字段）
+- `transcript.ts` - JSONL 消息结构和解析后的摘要
+- `config.ts` - 最小化用户配置
+- `session-hook.ts` - SessionEnd stdin JSON 格式
 
-## Package Structure
+## 包结构
 
-- **ESM only** (`"type": "module"`) - Node 22+ required
-- **bin entry**: `bin/claude-receipts.js` imports from `dist/cli.js`
-- **Exports**: Main exports from `src/index.ts` for programmatic use
-- **Files distributed**: `dist/`, `bin/`, `templates/` (though templates currently unused)
+- **仅 ESM**（`"type": "module"`）- 需要 Node 22+
+- **bin 入口**：`bin/token-receipts.js` 从 `dist/cli.js` 导入
+- **导出**：主导出来自 `src/index.ts` 用于程序化使用
+- **分发文件**：`dist/`、`bin/`、`templates/`（模板目前未使用）
 
-## Known Constraints
+## 已知限制
 
-- Cannot output to console from SessionEnd hook (terminal already closed)
-- ccusage must be installed (bundled as dependency)
-- Requires valid `projectPath` from ccusage to find transcript
-- Session data has slight delay; ccusage may not have processed most recent session immediately
-- Browser auto-open uses platform-specific commands (`open`, `start`, `xdg-open`)
+- 无法从 SessionEnd hook 输出到控制台（终端已关闭）
+- 必须安装 ccusage（作为依赖打包）
+- 需要 ccusage 提供有效的 `projectPath` 才能找到 transcript
+- 会话数据有轻微延迟；ccusage 可能不会立即处理最新的会话
+- 浏览器自动打开使用平台特定命令（`open`、`start`、`xdg-open`）
 
-## Hook Installation
+## Hook 安装
 
-Setup command modifies `~/.claude/settings.json`:
+Setup 命令修改 `~/.claude/settings.json`：
 
 ```json
 {
@@ -149,7 +149,7 @@ Setup command modifies `~/.claude/settings.json`:
         "hooks": [
           {
             "type": "command",
-            "command": "npx claude-receipts@latest generate --output html"
+            "command": "npx token-receipts@latest generate --output html"
           }
         ]
       }
@@ -158,4 +158,4 @@ Setup command modifies `~/.claude/settings.json`:
 }
 ```
 
-Always backs up settings.json before modification. Uses `@latest` to ensure users get updates without reinstalling.
+修改前始终备份 settings.json。使用 `@latest` 确保用户无需重新安装即可获取更新。

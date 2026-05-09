@@ -6,7 +6,7 @@ const WINDOW_SECONDS = 60 * 60; // 1 hour
  */
 async function hashIP(ip: string): Promise<string> {
   const encoder = new TextEncoder();
-  const data = encoder.encode(ip + "-claude-receipts-salt");
+  const data = encoder.encode(ip + "-token-receipts-salt");
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray

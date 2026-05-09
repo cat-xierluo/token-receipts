@@ -8,7 +8,7 @@ import { SetupCommand } from "./commands/setup.js";
 const program = new Command();
 
 program
-  .name("claude-receipts")
+  .name("token-receipts")
   .description("Generate quirky, shareable receipts for your Claude Code usage")
   .version("1.0.0");
 

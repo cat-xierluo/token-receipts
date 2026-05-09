@@ -436,7 +436,7 @@ export class HtmlRenderer {
         <div class="footer-message">Thank you for building!</div>
         <div class="generated-by">
           Print your own <strong>Claude receipts</strong> with<br>
-          <a href="https://github.com/chrishutchinson/claude-receipts" style="color: #333;">github.com/chrishutchinson/claude-receipts</a>
+          <a href="https://github.com/chrishutchinson/token-receipts" style="color: #333;">github.com/chrishutchinson/token-receipts</a>
         </div>
       </div>
     </div>

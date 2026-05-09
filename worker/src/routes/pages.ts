@@ -30,5 +30,5 @@ pageRoutes.get("/r/:id", async (c) => {
 
 // Root redirect to GitHub
 pageRoutes.get("/", (c) => {
-  return c.redirect("https://github.com/chrishutchinson/claude-receipts");
+  return c.redirect("https://github.com/chrishutchinson/token-receipts");
 });

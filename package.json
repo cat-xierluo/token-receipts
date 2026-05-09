@@ -1,22 +1,22 @@
 {
-  "name": "claude-receipts",
+  "name": "token-receipts",
   "version": "1.1.0",
   "description": "Bring receipts from your Claude Code sessions",
   "license": "MIT",
   "author": "Chris Hutchinson <github.com/chrishutchinson>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrishutchinson/claude-receipts.git"
+    "url": "https://github.com/chrishutchinson/token-receipts.git"
   },
   "bugs": {
-    "url": "https://github.com/chrishutchinson/claude-receipts/issues"
+    "url": "https://github.com/chrishutchinson/token-receipts/issues"
   },
-  "homepage": "https://github.com/chrishutchinson/claude-receipts#readme",
+  "homepage": "https://github.com/chrishutchinson/token-receipts#readme",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "claude-receipts": "./bin/claude-receipts.js"
+    "token-receipts": "./bin/claude-receipts.js"
   },
   "files": [
     "dist",
