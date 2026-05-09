@@ -13,6 +13,7 @@ import {
   getCurrencySymbol,
 } from "../utils/model-pricing.js";
 import type { Provider } from "../utils/model-pricing.js";
+import { getRandomQuote } from "../utils/quotes.js";
 
 // Embedded receipt data used by the local PNG export button.
 export interface ReceiptExportData {
@@ -74,9 +75,10 @@ export class HtmlRenderer {
   /**
    * Generate HTML receipt with embedded CSS
    */
-  generateHtml(data: ReceiptData, receiptText: string): string {
+  async generateHtml(data: ReceiptData, receiptText: string): Promise<string> {
     const exportData = this.getExportData(data);
     const mainProvider = this.getMainProvider(data);
+    const quote = getRandomQuote();
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -120,7 +122,7 @@ ${this.sharedCss()}
 
       <div class="footer">
         <div>CASHIER: ${this.getMainModel(data)}</div>
-        <div class="footer-message">Thank you for building!</div>
+        <div class="footer-message">${this.escapeHtml(quote)}</div>
         <div class="generated-by">
           Print your own <strong>token receipts</strong> with<br>
           <a href="${GITHUB_URL}" style="color: #333;">github.com/cat-xierluo/token-receipts</a>
@@ -151,7 +153,7 @@ ${JSON.stringify(exportData, null, 2)}
     function fillEdgeStripes(el, offset) {
       if (!el) return;
       let html = '';
-      for (let x = offset; x < 460; x += 20) {
+      for (let x = offset; x < 540; x += 20) {
         html += '<div class="stripe" style="left:' + x + 'px"></div>';
       }
       el.innerHTML = html;
@@ -303,7 +305,7 @@ ${JSON.stringify(exportData, null, 2)}
   /**
    * Generate daily summary HTML receipt
    */
-  generateDailyHtml(data: DailySummaryData): string {
+  async generateDailyHtml(data: DailySummaryData): Promise<string> {
     const { summary, location, config } = data;
     const logo = getHeader("anthropic");
     const [y, m, d] = summary.date.split("-").map(Number);
@@ -311,8 +313,9 @@ ${JSON.stringify(exportData, null, 2)}
     const isToday = summary.date === new Date().toISOString().slice(0, 10);
     const dayEnd = isToday ? new Date() : new Date(y, m - 1, d, 23, 59);
     const durationStr = this.formatDayDuration(dayStart, dayEnd);
-    const timeStart = `${summary.date} 00:00`;
-    const timeEnd = `${summary.date} ${dayEnd.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })}`;
+    const timeEnd = dayEnd.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+    const dateDisplay = `${summary.date}  00:00 ~ ${timeEnd}`;
+    const quote = getRandomQuote();
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -332,7 +335,7 @@ ${this.sharedCss()}
         <div class="logo logo-anthropic">${logo}</div>
         <div style="text-align:center; margin-top:10px;">
           <div style="font-size:18px; font-weight:bold; letter-spacing:2px;">DAILY SUMMARY</div>
-          <div style="font-size:14px; margin-top:5px;">${summary.date}</div>
+          <div style="font-size:14px; margin-top:5px;">${dateDisplay}</div>
         </div>
         <div class="meta" style="margin-top:15px;">
           <div class="meta-row">
@@ -343,9 +346,6 @@ ${this.sharedCss()}
           </div>
           <div class="meta-row">
             <div>Duration</div><div class="dots">....................</div><div class="value">${durationStr}</div>
-          </div>
-          <div class="meta-row">
-            <div>Time</div><div class="dots">....................</div><div class="value">${timeStart} ~ ${timeEnd}</div>
           </div>
         </div>
       </div>
@@ -363,7 +363,7 @@ ${this.sharedCss()}
 
       <div class="footer">
         <div>CASHIER: Daily Summary</div>
-        <div class="footer-message">Thank you for building!</div>
+        <div class="footer-message">${this.escapeHtml(quote)}</div>
         <div class="generated-by">
           Print your own <strong>token receipts</strong> with<br>
           <a href="${GITHUB_URL}" style="color: #333;">github.com/cat-xierluo/token-receipts</a>
@@ -388,7 +388,7 @@ ${this.sharedCss()}
     function fillEdgeStripes(el, offset) {
       if (!el) return;
       let html = '';
-      for (let x = offset; x < 460; x += 20) {
+      for (let x = offset; x < 540; x += 20) {
         html += '<div class="stripe" style="left:' + x + 'px"></div>';
       }
       el.innerHTML = html;
@@ -452,7 +452,7 @@ ${this.sharedCss()}
 
     body {
       font-family: 'Courier New', Courier, monospace;
-      font-size: 16px;
+      font-size: 20px;
       background: #3a3a3a;
       min-height: 100vh;
       display: flex;
@@ -470,7 +470,7 @@ ${this.sharedCss()}
 
     .receipt {
       background: #f8f8f8;
-      width: 400px;
+      width: 480px;
       padding: 45px 20px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
       position: relative;
@@ -508,7 +508,7 @@ ${this.sharedCss()}
     }
 
     .logo {
-      --logo-font-size: 16px;
+      --logo-font-size: 20px;
       --logo-line-height: 1.2;
       width: 35ch;
       height: 96px;
@@ -595,7 +595,7 @@ ${this.sharedCss()}
       color: #666;
     }
 
-    .footer-message { margin: 15px 0; color: #333; }
+    .footer-message { margin: 25px 0; color: #333; }
 
     .meta {
       margin: 10px 0;
@@ -616,8 +616,8 @@ ${this.sharedCss()}
     .meta .value { text-align: right; }
 
     .generated-by {
-      margin-top: 20px;
-      padding-top: 20px;
+      margin-top: 25px;
+      padding-top: 25px;
       border-top: 1px dashed #999;
     }
 
