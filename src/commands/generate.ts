@@ -1,4 +1,6 @@
 import { stdin } from "process";
+import { homedir } from "os";
+import { existsSync } from "fs";
 import chalk from "chalk";
 import boxen from "boxen";
 import ora from "ora";
@@ -6,6 +8,7 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import { DataFetcher } from "../core/data-fetcher.js";
 import { TranscriptParser } from "../core/transcript-parser.js";
+import { TranscriptDataFetcher } from "../core/transcript-data-fetcher.js";
 import { ReceiptGenerator } from "../core/receipt-generator.js";
 import { HtmlRenderer } from "../core/html-renderer.js";
 import { ThermalPrinterRenderer } from "../core/thermal-printer.js";
@@ -28,6 +31,7 @@ export interface GenerateOptions {
 export class GenerateCommand {
   private dataFetcher = new DataFetcher();
   private transcriptParser = new TranscriptParser();
+  private transcriptDataFetcher = new TranscriptDataFetcher();
   private receiptGenerator = new ReceiptGenerator();
   private htmlRenderer = new HtmlRenderer();
   private thermalPrinter = new ThermalPrinterRenderer();
@@ -52,55 +56,55 @@ export class GenerateCommand {
       // Load config
       const config = await this.configManager.loadConfig();
 
-      // Fetch session data from ccusage
-      spinner.text = "Fetching session data...";
-
+      // --- 新的数据获取逻辑 ---
       let sessionData;
-      try {
-        if (actualSessionId) {
-          // From hook or when we have the full UUID — fetch directly by ID
-          // for accurate totals (avoids sub-session slice issue with --breakdown)
-          sessionData =
-            await this.dataFetcher.fetchSessionById(actualSessionId);
-        } else {
-          // Manual mode — discover session by prefix/name, then fetch accurate data
-          sessionData =
-            await this.dataFetcher.fetchSessionData(options.session);
-        }
-      } catch (err) {
-        if (stdinData) {
-          // Session not found in ccusage — likely too short or not yet processed.
-          // Exit silently rather than generating a receipt for the wrong session.
-          spinner.stop();
-          return;
-        }
-        throw err;
-      }
+      let transcriptData;
 
-      // Determine transcript path if not from hook
-      if (!transcriptPath) {
-        // Try to extract actual session ID from projectPath
-        // Format: "project-name/actual-session-id"
+      if (transcriptPath) {
+        // 有 transcriptPath 时（来自 hook 或推断），直接读取
+        spinner.text = "Reading transcript...";
+        const result =
+          await this.transcriptDataFetcher.fetchFromTranscript(transcriptPath);
+        sessionData = result.sessionData;
+        transcriptData = result.transcriptData;
+      } else {
+        // 手动模式无 transcriptPath，降级到 ccusage
+        spinner.text = "Fetching session data...";
+        try {
+          if (actualSessionId) {
+            sessionData =
+              await this.dataFetcher.fetchSessionById(actualSessionId);
+          } else {
+            sessionData =
+              await this.dataFetcher.fetchSessionData(options.session);
+          }
+        } catch (err) {
+          if (stdinData) {
+            spinner.stop();
+            return;
+          }
+          throw err;
+        }
+        // 从 ccusage 数据推断 transcriptPath
         if (
+          !transcriptPath &&
           sessionData.projectPath &&
           sessionData.projectPath !== "Unknown Project"
         ) {
           const parts = sessionData.projectPath.split("/");
-          actualSessionId = parts[parts.length - 1]; // Last part is the actual session ID
-
-          const home = process.env.HOME || process.env.USERPROFILE || "";
-          transcriptPath = `${home}/.claude/projects/${sessionData.projectPath}.jsonl`;
+          actualSessionId = parts[parts.length - 1];
+          transcriptPath = `${homedir()}/.claude/projects/${sessionData.projectPath}.jsonl`;
+        }
+        if (transcriptPath) {
+          spinner.text = "Parsing transcript...";
+          transcriptData =
+            await this.transcriptParser.parseTranscript(transcriptPath);
         } else {
           throw new Error(
             "Cannot determine transcript path. Session has no valid project path.",
           );
         }
       }
-
-      // Parse transcript
-      spinner.text = "Parsing transcript...";
-      const transcriptData =
-        await this.transcriptParser.parseTranscript(transcriptPath);
 
       // Get location
       const location =
@@ -210,18 +214,38 @@ export class GenerateCommand {
     isFromHook: boolean,
   ): Promise<void> {
     const fileName = sessionSlug || sessionId;
-    const home = process.env.HOME || process.env.USERPROFILE || "";
-    const outputDir = `${home}/.token-receipts/projects`;
-    const fullPath = `${outputDir}/${fileName}.html`;
-
+    const home = homedir();
     const html = this.htmlRenderer.generateHtml(receiptData, receipt);
-    await this.saveHtmlFile(html, fullPath);
+
+    // 保存到项目目录
+    const projectDir = `${home}/.token-receipts/projects`;
+    const projectPath = `${projectDir}/${fileName}.html`;
+    await this.saveHtmlFile(html, projectPath);
+
+    // 自动保存到桌面或下载文件夹（无感保存）
+    const autoSavePath = this.getAutoSavePath(fileName);
+    if (autoSavePath) {
+      await this.saveHtmlFile(html, autoSavePath);
+    }
 
     if (isFromHook) {
-      await this.openInBrowser(fullPath);
+      await this.openInBrowser(autoSavePath || projectPath);
     } else {
       console.log(chalk.cyan("\nTip: Open in browser to view!"));
     }
+  }
+
+  /**
+   * 获取自动保存路径：优先桌面，其次下载文件夹
+   */
+  private getAutoSavePath(fileName: string): string | null {
+    const home = homedir();
+    const desktop = `${home}/Desktop`;
+    const downloads = `${home}/Downloads`;
+
+    if (existsSync(desktop)) return `${desktop}/${fileName}.html`;
+    if (existsSync(downloads)) return `${downloads}/${fileName}.html`;
+    return null;
   }
 
   /**
