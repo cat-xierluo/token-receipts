@@ -8,6 +8,7 @@ import {
   formatDuration,
 } from "../utils/formatting.js";
 import { getHeader, SEPARATOR, LIGHT_SEPARATOR } from "../utils/ascii-art.js";
+import { getDisplayName } from "../utils/model-pricing.js";
 
 export interface ReceiptData {
   sessionData: CcusageSession;
@@ -213,18 +214,7 @@ export class ReceiptGenerator {
    * Get a clean model name
    */
   private getModelName(model: string): string {
-    // Remove date suffixes and clean up model names
-    const cleaned = model.replace(/-\d{8}$/, "");
-
-    const modelMap: Record<string, string> = {
-      "claude-sonnet-4-5": "Claude Sonnet 4.5",
-      "claude-opus-4-5": "Claude Opus 4.5",
-      "claude-3-5-sonnet": "Claude 3.5 Sonnet",
-      "claude-3-opus": "Claude 3 Opus",
-      "claude-3-haiku": "Claude 3 Haiku",
-    };
-
-    return modelMap[cleaned] || model;
+    return getDisplayName(model);
   }
 
   /**
