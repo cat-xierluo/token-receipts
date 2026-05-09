@@ -96,7 +96,7 @@
 | `data-fetcher.ts` | **降级路径**：获取会话用量数据 | `ccusage session --id --json`（可选） |
 | `transcript-parser.ts` | 解析会话记录，提取 usage + model | `~/.claude/projects/*.jsonl` |
 | `receipt-generator.ts` | 生成 ASCII 文本收据 | 无 |
-| `html-renderer.ts` | 生成 HTML 收据 | 内联 CSS |
+| `html-renderer.ts` | 生成 HTML 收据 | 内联 CSS；复用 `ascii-art.ts` 的供应商 logo |
 | `config-manager.ts` | 配置文件读写 | `~/.token-receipts.config.json` |
 
 #### 工具层 (`src/utils/`)
@@ -106,7 +106,7 @@
 | `model-pricing.ts` | 模型定价与费用计算 | 64 个定价条目，7 家供应商，USD/CNY 双币种 |
 | `location.ts` | 位置检测 | 优先级：CLI > 配置 > geoip-lite > "The Cloud" |
 | `formatting.ts` | 格式化工具 | 货币、数字、日期、时长 |
-| `ascii-art.ts` | ASCII 艺术 | 按供应商显示对应 logo（7 家） |
+| `ascii-art.ts` | ASCII 艺术 | 供应商图形标识注册表，终端/HTML 共用（7 家） |
 
 ### 数据流
 
