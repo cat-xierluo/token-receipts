@@ -1,6 +1,7 @@
 import type { CcusageSession } from "../types/ccusage.js";
 import type { ParsedTranscript } from "../types/transcript.js";
 import type { ReceiptConfig } from "../types/config.js";
+import type { DailySummaryData } from "../types/daily.js";
 import {
   formatCurrency,
   formatNumber,
@@ -253,5 +254,93 @@ export class ReceiptGenerator {
       return getProvider(sessionData.modelsUsed[0]);
     }
     return "anthropic";
+  }
+
+  /**
+   * Generate a daily summary receipt
+   */
+  generateDailyReceipt(data: DailySummaryData): string {
+    const lines: string[] = [];
+    const { summary, location, config } = data;
+
+    lines.push(SEPARATOR);
+    lines.push(getHeader("anthropic"));
+    lines.push(SEPARATOR);
+    lines.push("");
+    lines.push(this.centerText("DAILY SUMMARY", 35));
+    lines.push(this.centerText(summary.date, 35));
+    lines.push("");
+
+    const [y, m, d] = summary.date.split("-").map(Number);
+    const dayStart = new Date(y, m - 1, d);
+    const isToday = summary.date === new Date().toISOString().slice(0, 10);
+    const dayEnd = isToday ? new Date() : new Date(y, m - 1, d, 23, 59);
+    const durationDiff = dayEnd.getTime() - dayStart.getTime();
+    const dHours = Math.floor(durationDiff / 3600000);
+    const dMins = Math.floor((durationDiff % 3600000) / 60000);
+    const durationLabel = dHours > 0 ? `${dHours}h ${dMins}m` : `${dMins}m`;
+    const timeEnd = dayEnd.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+
+    lines.push(
+      this.centerText(
+        `${summary.sessionCount} sessions | ${durationLabel}`,
+        35,
+      ),
+    );
+    lines.push(
+      this.centerText(`00:00 ~ ${timeEnd}`, 35),
+    );
+    lines.push(this.centerText(`Location: ${location}`, 35));
+    lines.push("");
+
+    // Model breakdown
+    lines.push(SEPARATOR);
+    lines.push(this.padLine("ITEM", "QTY", "PRICE"));
+    lines.push(LIGHT_SEPARATOR);
+
+    for (const model of summary.modelSummaries) {
+      const sym = getCurrencySymbol(model.modelName);
+      lines.push(model.displayName);
+
+      lines.push(
+        this.padLine("  Input tokens", formatNumber(model.inputTokens), ""),
+      );
+      lines.push(
+        this.padLine("  Output tokens", formatNumber(model.outputTokens), ""),
+      );
+
+      if (model.cacheCreationTokens > 0) {
+        lines.push(
+          this.padLine("  Cache write", formatNumber(model.cacheCreationTokens), ""),
+        );
+      }
+      if (model.cacheReadTokens > 0) {
+        lines.push(
+          this.padLine("  Cache read", formatNumber(model.cacheReadTokens), ""),
+        );
+      }
+
+      lines.push(
+        this.padLine("", "", formatCurrency(model.estimatedCost, sym)),
+      );
+      lines.push("");
+    }
+
+    // Totals
+    const totalSymbol = getCurrencySymbol(summary.allModelsUsed[0] ?? "");
+    lines.push(SEPARATOR);
+    lines.push(
+      this.padLine("TOTAL", "", formatCurrency(summary.totalCost, totalSymbol)),
+    );
+    lines.push(SEPARATOR);
+    lines.push("");
+
+    lines.push("CASHIER: Daily Summary");
+    lines.push("");
+    lines.push(this.centerText("Thank you for building!", 35));
+    lines.push("");
+    lines.push(SEPARATOR);
+
+    return lines.join("\n");
   }
 }

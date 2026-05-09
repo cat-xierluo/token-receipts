@@ -2,6 +2,7 @@
 
 import { Command, Option } from "commander";
 import { GenerateCommand } from "./commands/generate.js";
+import { DailyCommand } from "./commands/daily.js";
 import { ConfigCommand } from "./commands/config.js";
 import { SetupCommand } from "./commands/setup.js";
 
@@ -38,6 +39,21 @@ program
   .action(async (options) => {
     const command = new GenerateCommand();
     await command.execute(options);
+  });
+
+// Daily command
+program
+  .command("daily")
+  .description("Generate a daily summary receipt for all sessions")
+  .option("-d, --date <date>", "Target date (YYYY-MM-DD, 'today', 'yesterday'). Defaults to today")
+  .option("-o, --output <formats>", "Output format: html, console (comma-separated)")
+  .option("-l, --location <text>", "Override location detection")
+  .action(async (options) => {
+    const command = new DailyCommand();
+    const outputs = options.output
+      ? options.output.split(",").map((s: string) => s.trim())
+      : ["console"];
+    await command.execute({ ...options, output: outputs });
   });
 
 // Config command

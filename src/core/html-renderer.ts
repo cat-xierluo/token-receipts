@@ -1,11 +1,12 @@
 import type { ReceiptData } from "./receipt-generator.js";
+import type { DailySummaryData } from "../types/daily.js";
 import {
   formatCurrency,
   formatNumber,
   formatDateTime,
   formatDuration,
 } from "../utils/formatting.js";
-import { PROVIDER_LOGOS } from "../utils/ascii-art.js";
+import { getHeader } from "../utils/ascii-art.js";
 import {
   getDisplayName,
   getProvider,
@@ -84,268 +85,7 @@ export class HtmlRenderer {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Claude Receipt - ${data.transcriptData.sessionSlug}</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 16px;
-      background: #3a3a3a;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .receipt-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 40px;
-    }
-
-    .receipt {
-      background: #f8f8f8;
-      width: 400px;
-      padding: 45px 20px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-      position: relative;
-      animation: slideIn 0.5s ease-out;
-    }
-
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .receipt-edge {
-      position: absolute;
-      left: 0;
-      right: 0;
-      height: 15px;
-      overflow: hidden;
-      background: #3a3a3a;
-    }
-
-    .receipt-edge-top {
-      top: 0;
-    }
-
-    .receipt-edge-bottom {
-      bottom: 0;
-    }
-
-    .receipt-edge .stripe {
-      position: absolute;
-      top: 0;
-      width: 10px;
-      height: 15px;
-      background: #f8f8f8;
-    }
-
-    .receipt-content {
-      color: #333;
-      line-height: 1.6;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-    }
-
-    .header {
-      text-align: center;
-      padding: 20px 0;
-    }
-
-    .logo {
-      line-height: 1.2;
-      font-weight: bold;
-      white-space: pre;
-      display: inline-block;
-      margin: 10px 0;
-    }
-
-    .separator {
-      border-bottom: 2px solid #333;
-      margin: 15px 0;
-    }
-
-    .light-separator {
-      border-bottom: 1px dashed #999;
-      margin: 10px 0;
-    }
-
-    .summary {
-      background: #fff;
-      padding: 15px;
-      margin: 15px 0;
-      border-left: 4px solid #333;
-    }
-
-    .line-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 3px 0;
-      color: #555;
-    }
-
-    .model-header {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0 4px 0;
-      margin-top: 10px;
-      border-bottom: 1px dashed #ccc;
-    }
-
-    .model-header:first-child {
-      margin-top: 0;
-    }
-
-    .model-name {
-      font-weight: bold;
-      color: #333;
-    }
-
-    .model-cost {
-      font-weight: bold;
-      color: #333;
-    }
-
-    .total-section {
-      margin-top: 20px;
-      padding-top: 15px;
-      border-top: 2px solid #333;
-    }
-
-    .total {
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      margin: 10px 0;
-    }
-
-    .footer {
-      text-align: center;
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 2px dashed #999;
-      color: #666;
-    }
-
-    .footer-message {
-      margin: 15px 0;
-      color: #333;
-    }
-
-    .meta {
-      margin: 10px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .meta-row {
-      color: #666;
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr) auto;
-      gap: 1px;
-      text-align: left;
-    }
-
-    .meta .dots {
-      overflow: hidden;
-      text-wrap: auto;
-      word-wrap: break-word;
-      height: 1rem;
-    }
-
-    .meta .value {
-      text-align: right;
-    }
-
-    .download-link {
-      text-align: center;
-      margin-top: 20px;
-    }
-
-    .download-link a {
-      display: inline-block;
-      padding: 10px 20px;
-      background: #333;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
-      transition: background 0.3s;
-    }
-
-    .download-link a:hover {
-      background: #000;
-    }
-
-    .generated-by {
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px dashed #999;
-    }
-
-    .actions {
-      display: flex;
-      justify-content: center;
-    }
-
-    .action-btn {
-      background: #333;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-      transition: background 0.3s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .action-btn:hover {
-      background: #000;
-    }
-
-    .action-btn:disabled {
-      background: #666;
-      cursor: not-allowed;
-    }
-
-    .action-btn.success {
-      background: #2d5a27;
-    }
-
-    .action-btn.error {
-      background: #8b2020;
-    }
-
-    @media print {
-      body {
-        background: white;
-      }
-      .receipt {
-        box-shadow: none;
-        width: 100%;
-      }
-      .download-link,
-      .actions {
-        display: none;
-      }
-    }
+${this.sharedCss()}
   </style>
 </head>
 <body>
@@ -353,7 +93,7 @@ export class HtmlRenderer {
     <div class="receipt">
       <div class="receipt-edge receipt-edge-top" id="edge-top"></div>
       <div class="header">
-        <div class="logo">${PROVIDER_LOGOS[mainProvider]}</div>
+        <div class="logo logo-${mainProvider}">${getHeader(mainProvider)}</div>
         <div class="meta">
           <div class="meta-row">
             <div>Location</div><div class="dots">....................</div><div class="value">${this.escapeHtml(data.location)}</div>
@@ -561,8 +301,405 @@ ${JSON.stringify(exportData, null, 2)}
   }
 
   /**
+   * Generate daily summary HTML receipt
+   */
+  generateDailyHtml(data: DailySummaryData): string {
+    const { summary, location, config } = data;
+    const logo = getHeader("anthropic");
+    const [y, m, d] = summary.date.split("-").map(Number);
+    const dayStart = new Date(y, m - 1, d);
+    const isToday = summary.date === new Date().toISOString().slice(0, 10);
+    const dayEnd = isToday ? new Date() : new Date(y, m - 1, d, 23, 59);
+    const durationStr = this.formatDayDuration(dayStart, dayEnd);
+    const timeStart = "00:00";
+    const timeEnd = dayEnd.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Receipt - ${summary.date}</title>
+  <style>
+${this.sharedCss()}
+  </style>
+</head>
+<body>
+  <div class="receipt-container">
+    <div class="receipt">
+      <div class="receipt-edge receipt-edge-top" id="edge-top"></div>
+      <div class="header">
+        <div class="logo logo-anthropic">${logo}</div>
+        <div style="text-align:center; margin-top:10px;">
+          <div style="font-size:18px; font-weight:bold; letter-spacing:2px;">DAILY SUMMARY</div>
+          <div style="font-size:14px; margin-top:5px;">${summary.date}</div>
+        </div>
+        <div class="meta" style="margin-top:15px;">
+          <div class="meta-row">
+            <div>Location</div><div class="dots">....................</div><div class="value">${this.escapeHtml(location)}</div>
+          </div>
+          <div class="meta-row">
+            <div>Sessions</div><div class="dots">....................</div><div class="value">${summary.sessionCount}</div>
+          </div>
+          <div class="meta-row">
+            <div>Duration</div><div class="dots">....................</div><div class="value">${durationStr}</div>
+          </div>
+          <div class="meta-row">
+            <div>Time</div><div class="dots">....................</div><div class="value">${timeStart} ~ ${timeEnd}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="separator"></div>
+
+      ${this.renderDailyLineItems(summary)}
+
+      <div class="total-section">
+        <div class="total">
+          <span>TOTAL</span>
+          <span>${formatCurrency(summary.totalCost, getCurrencySymbol(summary.allModelsUsed[0] ?? ""))}</span>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div>CASHIER: Daily Summary</div>
+        <div class="footer-message">Thank you for building!</div>
+        <div class="generated-by">
+          Print your own <strong>token receipts</strong> with<br>
+          <a href="${GITHUB_URL}" style="color: #333;">github.com/cat-xierluo/token-receipts</a>
+        </div>
+      </div>
+      <div class="receipt-edge receipt-edge-bottom" id="edge-bottom"></div>
+    </div>
+
+    <div class="actions">
+      <button class="action-btn" id="save-img-btn" onclick="saveAsImage('png')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+        <span id="save-img-btn-text">Save PNG</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    function fillEdgeStripes(el, offset) {
+      if (!el) return;
+      let html = '';
+      for (let x = offset; x < 460; x += 20) {
+        html += '<div class="stripe" style="left:' + x + 'px"></div>';
+      }
+      el.innerHTML = html;
+    }
+    fillEdgeStripes(document.getElementById('edge-top'), 0);
+    fillEdgeStripes(document.getElementById('edge-bottom'), 10);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') window.close();
+    });
+
+    console.log('Daily Receipt Generated!');
+    console.log('Date:', '${summary.date}');
+    console.log('Sessions:', ${summary.sessionCount});
+    console.log('Press ESC to close');
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+  <script>
+    async function saveAsImage(format) {
+      const btn = document.getElementById('save-img-btn');
+      const btnText = document.getElementById('save-img-btn-text');
+      btn.disabled = true;
+      btnText.textContent = 'Saving...';
+
+      try {
+        const receipt = document.querySelector('.receipt');
+        const dataUrl = await htmlToImage.toPng(receipt, {
+          quality: 1,
+          pixelRatio: 3,
+          backgroundColor: '#ffffff',
+          style: { boxShadow: 'none', animation: 'none' },
+        });
+
+        const link = document.createElement('a');
+        link.download = 'daily-${summary.date}.' + format;
+        link.href = dataUrl;
+        link.click();
+
+        btnText.textContent = 'Saved!';
+        btn.classList.add('success');
+        setTimeout(() => { btn.disabled = false; btn.classList.remove('success'); btnText.textContent = 'Save PNG'; }, 2000);
+      } catch (err) {
+        console.error('Save image failed:', err);
+        btnText.textContent = 'Failed';
+        btn.classList.add('error');
+        setTimeout(() => { btn.disabled = false; btn.classList.remove('error'); btnText.textContent = 'Save PNG'; }, 2000);
+      }
+    }
+  </script>
+</body>
+</html>`;
+  }
+
+  private sharedCss(): string {
+    return `    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 16px;
+      background: #3a3a3a;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .receipt-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .receipt {
+      background: #f8f8f8;
+      width: 400px;
+      padding: 45px 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      position: relative;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .receipt-edge {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 15px;
+      overflow: hidden;
+      background: #3a3a3a;
+    }
+
+    .receipt-edge-top { top: 0; }
+    .receipt-edge-bottom { bottom: 0; }
+
+    .receipt-edge .stripe {
+      position: absolute;
+      top: 0;
+      width: 10px;
+      height: 15px;
+      background: #f8f8f8;
+    }
+
+    .header {
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .logo {
+      --logo-font-size: 16px;
+      --logo-line-height: 1.2;
+      width: 35ch;
+      height: 96px;
+      overflow: hidden;
+      font-size: var(--logo-font-size);
+      line-height: var(--logo-line-height);
+      font-weight: bold;
+      white-space: pre;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 10px auto;
+      text-align: left;
+    }
+
+    .logo-openai {
+      --logo-font-size: 7px;
+      --logo-line-height: 0.74;
+    }
+
+    .logo-deepseek {
+      --logo-font-size: 8px;
+      --logo-line-height: 0.82;
+    }
+
+    .logo-minimax {
+      --logo-font-size: 7px;
+      --logo-line-height: 0.78;
+    }
+
+    .logo-qwen {
+      --logo-font-size: 6.2px;
+      --logo-line-height: 0.70;
+    }
+
+    .logo-kimi {
+      --logo-font-size: 9px;
+      --logo-line-height: 0.95;
+    }
+
+    .separator {
+      border-bottom: 2px solid #333;
+      margin: 15px 0;
+    }
+
+    .line-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 3px 0;
+      color: #555;
+    }
+
+    .model-header {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0 4px 0;
+      margin-top: 10px;
+      border-bottom: 1px dashed #ccc;
+    }
+
+    .model-header:first-child { margin-top: 0; }
+
+    .model-name { font-weight: bold; color: #333; }
+    .model-cost { font-weight: bold; color: #333; }
+
+    .total-section {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 2px solid #333;
+    }
+
+    .total {
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      margin: 10px 0;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px dashed #999;
+      color: #666;
+    }
+
+    .footer-message { margin: 15px 0; color: #333; }
+
+    .meta {
+      margin: 10px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .meta-row {
+      color: #666;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 1px;
+      text-align: left;
+    }
+
+    .meta .dots { overflow: hidden; text-wrap: auto; height: 1rem; }
+    .meta .value { text-align: right; }
+
+    .generated-by {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px dashed #999;
+    }
+
+    .actions { display: flex; justify-content: center; }
+
+    .action-btn {
+      background: #333;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-btn:hover { background: #000; }
+    .action-btn:disabled { background: #666; cursor: not-allowed; }
+    .action-btn.success { background: #2d5a27; }
+    .action-btn.error { background: #8b2020; }
+
+    @media print {
+      body { background: white; }
+      .receipt { box-shadow: none; width: 100%; }
+      .actions { display: none; }
+    }`;
+  }
+
+  private renderDailyLineItems(summary: import("../types/daily.js").DailySummary): string {
+    let html = '<div style="margin: 20px 0;">';
+
+    for (const model of summary.modelSummaries) {
+      const sym = getCurrencySymbol(model.modelName);
+      html += `<div class="model-header">
+        <span class="model-name">${this.escapeHtml(model.displayName)}</span>
+        <span class="model-cost">${formatCurrency(model.estimatedCost, sym)}</span>
+      </div>`;
+
+      html += `<div class="line-item">
+        <span>  Input tokens</span>
+        <span>${formatNumber(model.inputTokens)}</span>
+      </div>`;
+
+      html += `<div class="line-item">
+        <span>  Output tokens</span>
+        <span>${formatNumber(model.outputTokens)}</span>
+      </div>`;
+
+      if (model.cacheCreationTokens > 0) {
+        html += `<div class="line-item">
+          <span>  Cache write</span>
+          <span>${formatNumber(model.cacheCreationTokens)}</span>
+        </div>`;
+      }
+
+      if (model.cacheReadTokens > 0) {
+        html += `<div class="line-item">
+          <span>  Cache read</span>
+          <span>${formatNumber(model.cacheReadTokens)}</span>
+        </div>`;
+      }
+    }
+
+    html += "</div>";
+    return html;
+  }
+
+  /**
    * Escape HTML entities
    */
+  private formatDayDuration(start: Date, end: Date): string {
+    const diffMs = end.getTime() - start.getTime();
+    const hours = Math.floor(diffMs / 3600000);
+    const minutes = Math.floor((diffMs % 3600000) / 60000);
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
+  }
+
   private escapeHtml(text: string): string {
     const map: Record<string, string> = {
       "&": "&amp;",
