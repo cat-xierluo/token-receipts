@@ -96,9 +96,12 @@ export class GenerateCommand {
           transcriptPath = `${homedir()}/.claude/projects/${sessionData.projectPath}.jsonl`;
         }
         if (transcriptPath) {
-          spinner.text = "Parsing transcript...";
-          transcriptData =
-            await this.transcriptParser.parseTranscript(transcriptPath);
+          // 有 transcriptPath 时，使用直读模式获取准确的模型数据
+          spinner.text = "Reading transcript...";
+          const result =
+            await this.transcriptDataFetcher.fetchFromTranscript(transcriptPath);
+          sessionData = result.sessionData;
+          transcriptData = result.transcriptData;
         } else {
           throw new Error(
             "Cannot determine transcript path. Session has no valid project path.",
