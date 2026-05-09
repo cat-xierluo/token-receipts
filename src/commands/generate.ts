@@ -12,6 +12,7 @@ import { TranscriptDataFetcher } from "../core/transcript-data-fetcher.js";
 import { ReceiptGenerator } from "../core/receipt-generator.js";
 import { HtmlRenderer } from "../core/html-renderer.js";
 import { ThermalPrinterRenderer } from "../core/thermal-printer.js";
+import { MiaoMiaoJiRenderer } from "../core/miaomiaoji-renderer.js";
 import { ConfigManager } from "../core/config-manager.js";
 import { LocationDetector } from "../utils/location.js";
 import type { SessionEndHookData } from "../types/session-hook.js";
@@ -19,7 +20,7 @@ import type { ReceiptData } from "../core/receipt-generator.js";
 
 const execAsync = promisify(exec);
 
-export type OutputFormat = "html" | "console" | "printer";
+export type OutputFormat = "html" | "console" | "printer" | "bt";
 
 export interface GenerateOptions {
   session?: string;
@@ -35,6 +36,7 @@ export class GenerateCommand {
   private receiptGenerator = new ReceiptGenerator();
   private htmlRenderer = new HtmlRenderer();
   private thermalPrinter = new ThermalPrinterRenderer();
+  private miaomiaojiRenderer = new MiaoMiaoJiRenderer();
   private configManager = new ConfigManager();
   private locationDetector = new LocationDetector();
 
@@ -152,6 +154,9 @@ export class GenerateCommand {
             case "console":
               this.outputToConsole(receipt);
               break;
+            case "bt":
+              await this.outputToBt(receiptData, options, config as unknown as Record<string, unknown>, spinner);
+              break;
           }
         } catch (err) {
           const error =
@@ -183,6 +188,20 @@ export class GenerateCommand {
 
       process.exit(1);
     }
+  }
+
+  /**
+   * Send receipt to MXW01 printer via BLE
+   */
+  private async outputToBt(
+    receiptData: ReceiptData,
+    _options: GenerateOptions,
+    _config: Record<string, unknown>,
+    spinner: ReturnType<typeof ora>,
+  ): Promise<void> {
+    spinner.start("Scanning for MXW01 printer via BLE...");
+    await this.miaomiaojiRenderer.printReceipt(receiptData);
+    spinner.succeed("Receipt printed via MXW01 BLE printer");
   }
 
   /**
@@ -218,7 +237,7 @@ export class GenerateCommand {
   ): Promise<void> {
     const fileName = this.sanitizeFileName(sessionSlug || sessionId);
     const home = homedir();
-    const html = this.htmlRenderer.generateHtml(receiptData, receipt);
+    const html = await this.htmlRenderer.generateHtml(receiptData, receipt);
 
     // 保存到项目目录
     const projectDir = `${home}/.token-receipts/projects`;

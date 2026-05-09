@@ -5,6 +5,7 @@ export interface ReceiptConfig {
   location?: string;
   timezone?: string;
   printer?: string;
+  btPrinter?: string;
 }
 
 export const DEFAULT_CONFIG: ReceiptConfig = {

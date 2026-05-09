@@ -19,10 +19,10 @@ program
   .description("Generate a receipt for a Claude Code session")
   .option("-s, --session <id>", "Specific session ID to generate receipt for")
   .addOption(
-    new Option("-o, --output <format...>", "Output format(s): html, console, printer (comma-separated or repeated)")
+    new Option("-o, --output <format...>", "Output format(s): html, console, printer, bt (comma-separated or repeated)")
       .argParser((value: string, prev: string[] | undefined) => {
         const formats = value.split(",").map((s) => s.trim()).filter(Boolean);
-        const valid = ["html", "console", "printer"];
+        const valid = ["html", "console", "printer", "bt"];
         for (const f of formats) {
           if (!valid.includes(f)) {
             throw new Error(`Invalid output format "${f}". Valid formats: ${valid.join(", ")}`);

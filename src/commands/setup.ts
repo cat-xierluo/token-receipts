@@ -71,6 +71,7 @@ export class SetupCommand {
         choices: [
           { title: "HTML (opens in browser)", value: "html", selected: true },
           { title: "Thermal printer", value: "printer" },
+          { title: "MiaoMiaoJi BT (喵喵机)", value: "bt" },
         ],
         hint: "- Space to select, Enter to confirm",
         instructions: false,
@@ -121,6 +122,11 @@ export class SetupCommand {
       if (outputs.includes("printer")) {
         tips.push(
           "Receipts will be sent to your thermal printer (configure with: token-receipts config --set printer=<name>)",
+        );
+      }
+      if (outputs.includes("bt")) {
+        tips.push(
+          "Receipts will be printed via MiaoMiaoJi Bluetooth printer (configure with: token-receipts config --set btPrinter=/dev/tty.MiaoMiaoJi-SerialPort)",
         );
       }
       console.log(chalk.cyan(tips.join("\n") + "\n"));

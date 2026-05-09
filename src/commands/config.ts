@@ -57,6 +57,7 @@ export class ConfigCommand {
     this.printConfigItem("Location", config.location || "(auto-detect)");
     this.printConfigItem("Timezone", config.timezone || "(system default)");
     this.printConfigItem("Printer", config.printer || "(not set)");
+    this.printConfigItem("BT Printer", config.btPrinter || "(not set)");
 
     console.log("");
   }
@@ -75,7 +76,7 @@ export class ConfigCommand {
     const trimmedKey = key.trim() as keyof ReceiptConfig;
 
     // Validate key
-    const validKeys: (keyof ReceiptConfig)[] = ["location", "timezone", "printer"];
+    const validKeys: (keyof ReceiptConfig)[] = ["location", "timezone", "printer", "btPrinter"];
 
     if (!validKeys.includes(trimmedKey)) {
       throw new Error(

@@ -4,6 +4,7 @@ import { SessionDiscoverer } from "../core/session-discoverer.js";
 import { DailyAggregator } from "../core/daily-aggregator.js";
 import { ReceiptGenerator } from "../core/receipt-generator.js";
 import { HtmlRenderer } from "../core/html-renderer.js";
+import { MiaoMiaoJiRenderer } from "../core/miaomiaoji-renderer.js";
 import { ConfigManager } from "../core/config-manager.js";
 import { LocationDetector } from "../utils/location.js";
 import { getCurrencySymbol } from "../utils/model-pricing.js";
@@ -67,9 +68,18 @@ export class DailyCommand {
         );
       }
 
+      if (format === "bt") {
+        const htmlRenderer = new HtmlRenderer();
+        const html = await htmlRenderer.generateDailyHtml(data);
+        const btRenderer = new MiaoMiaoJiRenderer();
+        console.log(chalk.blue("Printing daily summary via BLE..."));
+        await btRenderer.printHtml(html);
+        console.log(chalk.green("✔ Daily summary printed via MXW01"));
+      }
+
       if (format === "html") {
         const renderer = new HtmlRenderer();
-        const html = renderer.generateDailyHtml(data);
+        const html = await renderer.generateDailyHtml(data);
 
         const receiptDir = join(homedir(), ".token-receipts", "projects");
         mkdirSync(receiptDir, { recursive: true });
