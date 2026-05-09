@@ -2,6 +2,7 @@ import type { CcusageSession } from "../types/ccusage.js";
 import type { ParsedTranscript } from "../types/transcript.js";
 import type { ReceiptConfig } from "../types/config.js";
 import type { DailySummaryData } from "../types/daily.js";
+import { getRandomQuote } from "../utils/quotes.js";
 import {
   formatCurrency,
   formatNumber,
@@ -138,9 +139,12 @@ export class ReceiptGenerator {
     lines.push("");
 
     // Footer
+    const quote = getRandomQuote();
     lines.push(`CASHIER: ${this.getMainModel(data.sessionData)}`);
     lines.push("");
-    lines.push(this.centerText("Thank you for building!", 35));
+    lines.push("");
+    lines.push(this.centerText(quote, 35));
+    lines.push("");
     lines.push("");
     lines.push(SEPARATOR);
 
@@ -268,27 +272,26 @@ export class ReceiptGenerator {
     lines.push(SEPARATOR);
     lines.push("");
     lines.push(this.centerText("DAILY SUMMARY", 35));
-    lines.push(this.centerText(summary.date, 35));
-    lines.push("");
 
     const [y, m, d] = summary.date.split("-").map(Number);
     const dayStart = new Date(y, m - 1, d);
     const isToday = summary.date === new Date().toISOString().slice(0, 10);
     const dayEnd = isToday ? new Date() : new Date(y, m - 1, d, 23, 59);
+    const timeEnd = dayEnd.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+
+    lines.push(this.centerText(`${summary.date}  00:00 ~ ${timeEnd}`, 35));
+    lines.push("");
+
     const durationDiff = dayEnd.getTime() - dayStart.getTime();
     const dHours = Math.floor(durationDiff / 3600000);
     const dMins = Math.floor((durationDiff % 3600000) / 60000);
     const durationLabel = dHours > 0 ? `${dHours}h ${dMins}m` : `${dMins}m`;
-    const timeEnd = dayEnd.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
 
     lines.push(
       this.centerText(
         `${summary.sessionCount} sessions | ${durationLabel}`,
         35,
       ),
-    );
-    lines.push(
-      this.centerText(`${summary.date} 00:00 ~ ${timeEnd}`, 35),
     );
     lines.push(this.centerText(`Location: ${location}`, 35));
     lines.push("");
@@ -337,7 +340,12 @@ export class ReceiptGenerator {
 
     lines.push("CASHIER: Daily Summary");
     lines.push("");
-    lines.push(this.centerText("Thank you for building!", 35));
+    lines.push("");
+
+    const quote = getRandomQuote();
+    lines.push(this.centerText(quote, 35));
+
+    lines.push("");
     lines.push("");
     lines.push(SEPARATOR);
 

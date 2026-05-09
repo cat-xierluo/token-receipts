@@ -16,18 +16,19 @@ export function formatNumber(num: number): string {
 }
 
 /**
- * Format a date with timezone
+ * Format a date with timezone (receipt header style)
+ * e.g. "Jan 29, 2026, 08:12 AM JST"
  */
 export function formatDateTime(date: Date, timezone?: string): string {
   if (timezone) {
     try {
-      return formatInTimeZone(date, timezone, "yyyy-MM-dd HH:mm:ss zzz");
+      return formatInTimeZone(date, timezone, "MMM dd, yyyy, hh:mm a zzz");
     } catch {
       // Fallback if timezone is invalid
     }
   }
 
-  return format(date, "yyyy-MM-dd HH:mm:ss");
+  return format(date, "MMM dd, yyyy, hh:mm a");
 }
 
 /**
