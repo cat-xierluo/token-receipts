@@ -48,6 +48,14 @@ export class TranscriptParser {
       userMessageCount: userMessages.length,
       assistantMessageCount: assistantMessages.length,
       totalMessages: messages.length,
+      modelSummaries: [],
+      totalCost: 0,
+      totalTokens: 0,
+      totalInputTokens: 0,
+      totalOutputTokens: 0,
+      totalCacheCreationTokens: 0,
+      totalCacheReadTokens: 0,
+      modelsUsed: [],
     };
   }
 
