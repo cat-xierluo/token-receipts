@@ -19,6 +19,7 @@
 ### 变更
 
 - 规范化供应商 ASCII logo：保留 Claude 官方风格图标，其他供应商改为基于官方图形标识的单色小尺寸抽象，并统一本地 HTML 和图片导出的 logo 风格
+- 提升 ASCII logo 还原度：OpenAI/MiniMax/Qwen/DeepSeek/Kimi 改为更高颗粒度字符稿，并在 HTML 页面中压缩字号和行高，使展示区域接近 Claude 默认 logo 高度
 - 移除公开分享功能：删除指向原项目服务的 Share Publicly 入口、远端上传脚本和 Cloudflare Worker 分享页代码
 - 项目从 `claude-receipts` 重命名为 `token-receipts`
 - 配置文件路径从 `~/.claude-receipts.config.json` 改为 `~/.token-receipts.config.json`

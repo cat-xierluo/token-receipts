@@ -4,6 +4,34 @@
 
 ## 决策记录
 
+### [DEC-005] - 2026-05-09 - ASCII Logo 还原优先，展示层压缩
+
+**背景**
+
+多供应商 logo 如果强行压缩到 5-8 行，会明显丢失 OpenAI 环形结、MiniMax 波形、Qwen 镂空折带等关键识别特征。用户更希望复刻原始图形，而不是为了行数紧凑牺牲还原度。
+
+**选项**
+
+1. 继续压缩字符稿 - 页面占位稳定，但品牌图形失真
+2. 增加字符稿颗粒度并让页面自然撑开 - 还原度提升，但收据头部占位过大
+3. 增加字符稿颗粒度，同时在 HTML 展示层按 provider 缩小字号和行高 - 保留原始形态，页面占位接近 Claude 默认 logo
+
+**决策**
+
+采用选项 3。ASCII 源数据保留较高行数和四象限块字符细节；HTML 收据和预览页使用固定 logo 展示盒，并为 OpenAI/DeepSeek/MiniMax/Qwen/Kimi 设置更紧的字号与行高。
+
+**理由**
+
+ASCII 源数据负责还原，页面 CSS 负责排版压缩。这样可以同时满足“像原 logo”和“不占太多页面空间”两个目标，也避免以后为了页面高度反复删减字符细节。
+
+**影响**
+
+- `ascii-art.ts` 中部分 provider logo 行数增加
+- `html-renderer.ts` 通过 provider class 控制 logo 视觉尺寸
+- `docs/ascii-logo-preview.html` 同步展示压缩后的实际收据效果和原始字符稿
+
+---
+
 ### [DEC-004] - 2026-05-09 - 移除公开分享服务
 
 **背景**
@@ -101,6 +129,17 @@ HTML 收据页中的 `Share Publicly` 按钮会把收据数据上传到 `https:/
 ---
 
 ## 工作日志
+
+### 2026-05-09 18:53 (Codex)
+
+- **目标**：提升 ASCII logo 还原度，同时限制页面展示尺寸
+- **操作**：
+  - 将 OpenAI/DeepSeek/MiniMax/Qwen/Kimi 改为更高颗粒度的块字符稿
+  - 保留 Claude Code 原始 5 行热敏块字符形态
+  - 在 HTML 收据和预览页中加入固定 logo 展示盒与 provider 级缩放
+  - 生成 `receipt-ascii-preview.png` 截图检查页面布局
+- **结果**：详细字符稿不会撑大收据头部，展示区域接近 Claude 默认 logo 高度
+- **下一步**：如果继续微调，需要优先改 `src/utils/ascii-art.ts` 的原始字符稿，再检查预览页缩放效果
 
 ### 2026-05-09 18:11 (Codex)
 
