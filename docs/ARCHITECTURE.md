@@ -103,10 +103,10 @@
 
 | 文件 | 职责 | 说明 |
 |------|------|------|
-| `model-pricing.ts` | 模型定价与费用计算 | 内置价格表（Anthropic/OpenAI/DeepSeek/GLM/MiniMax/Qwen） |
+| `model-pricing.ts` | 模型定价与费用计算 | 64 个定价条目，7 家供应商，USD/CNY 双币种 |
 | `location.ts` | 位置检测 | 优先级：CLI > 配置 > geoip-lite > "The Cloud" |
 | `formatting.ts` | 格式化工具 | 货币、数字、日期、时长 |
-| `ascii-art.ts` | ASCII 艺术 | Claude logo 生成 |
+| `ascii-art.ts` | ASCII 艺术 | 按供应商显示对应 logo（7 家） |
 
 ### 数据流
 
@@ -198,11 +198,8 @@ token-receipts/
 │   └── index.ts                # 主导出
 ├── docs/                       # 文档
 │   ├── ARCHITECTURE.md
-│   └── ROADMAP.md
-├── status/                    # 协作文档
-│   ├── TASKS.md
-│   ├── DECISIONS.md
-│   └── JOURNAL.md
+│   ├── ROADMAP.md
+│   └── DECISIONS.md
 ├── templates/                  # 模板（未使用）
 ├── dist/                       # 编译输出
 ├── README.md
