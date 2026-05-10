@@ -34,7 +34,7 @@ export class SetupCommand {
   }
 
   async execute(options: SetupOptions): Promise<void> {
-    console.log(chalk.cyan.bold("\nClaude Receipts Setup\n"));
+    console.log(chalk.cyan.bold("\nToken Receipts Setup\n"));
 
     try {
       if (options.uninstall) {

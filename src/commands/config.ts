@@ -50,7 +50,7 @@ export class ConfigCommand {
     const config = await this.configManager.loadConfig();
     const configPath = this.configManager.getConfigPath();
 
-    console.log(chalk.cyan.bold("\nClaude Receipts Configuration"));
+    console.log(chalk.cyan.bold("\nToken Receipts Configuration"));
     console.log(chalk.gray(`Location: ${configPath}\n`));
 
     this.printConfigItem("Version", config.version);
