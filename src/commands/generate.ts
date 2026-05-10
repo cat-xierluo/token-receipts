@@ -74,7 +74,7 @@ export class GenerateCommand {
 
       if (transcriptPath) {
         // Auto-detect: Codex vs Claude session
-        const isCodexSession = transcriptPath.includes("/.codex/sessions/");
+        const isCodexSession = transcriptPath.includes("/.codex/sessions/") || transcriptPath.includes("/.codex/archived_sessions/");
         const fetcher = isCodexSession ? this.codexDataFetcher : this.transcriptDataFetcher;
         spinner.text = isCodexSession ? "Reading Codex transcript..." : "Reading transcript...";
         const result =

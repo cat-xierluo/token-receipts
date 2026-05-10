@@ -19,7 +19,7 @@ export class DailyAggregator {
 
     for (const fp of filePaths) {
       try {
-        const isCodex = fp.includes("/.codex/sessions/");
+        const isCodex = fp.includes("/.codex/sessions/") || fp.includes("/.codex/archived_sessions/");
         const parser = isCodex ? this.codexParser : this.claudeParser;
         const parsed: ParsedTranscript = await parser.parseTranscript(fp);
 
@@ -59,7 +59,7 @@ export class DailyAggregator {
     }
 
     const modelSummaries = [...modelMap.values()].sort(
-      (a, b) => b.totalTokens - a.totalTokens
+      (a, b) => b.estimatedCost - a.estimatedCost
     );
 
     const totalCost = modelSummaries.reduce((s, m) => s + m.estimatedCost, 0);
