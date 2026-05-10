@@ -143,7 +143,11 @@ export class ReceiptGenerator {
     lines.push(`CASHIER: ${this.getMainModel(data.sessionData)}`);
     lines.push("");
     lines.push("");
-    lines.push(this.centerText(quote, 35));
+    const quoteParts = quote.split(" — ");
+    lines.push(this.centerText(quoteParts[0], 35));
+    if (quoteParts[1]) {
+      lines.push(this.centerText(`— ${quoteParts[1]}`, 35));
+    }
     lines.push("");
     lines.push("");
     lines.push(SEPARATOR);
@@ -343,7 +347,11 @@ export class ReceiptGenerator {
     lines.push("");
 
     const quote = getRandomQuote();
-    lines.push(this.centerText(quote, 35));
+    const quoteParts = quote.split(" — ");
+    lines.push(this.centerText(quoteParts[0], 35));
+    if (quoteParts[1]) {
+      lines.push(this.centerText(`— ${quoteParts[1]}`, 35));
+    }
 
     lines.push("");
     lines.push("");

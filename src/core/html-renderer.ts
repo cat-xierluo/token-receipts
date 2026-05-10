@@ -122,7 +122,7 @@ ${this.sharedCss()}
 
       <div class="footer">
         <div>CASHIER: ${this.getMainModel(data)}</div>
-        <div class="footer-message">${this.escapeHtml(quote)}</div>
+        <div class="footer-message">${this.escapeHtml(quote).replace(/ — /g, "<br>— ")}</div>
         <div class="generated-by">
           Print your own <strong>token receipts</strong> with<br>
           <a href="${GITHUB_URL}" style="color: #333;">github.com/cat-xierluo/token-receipts</a>
@@ -363,7 +363,7 @@ ${this.sharedCss()}
 
       <div class="footer">
         <div>CASHIER: Daily Summary</div>
-        <div class="footer-message">${this.escapeHtml(quote)}</div>
+        <div class="footer-message">${this.escapeHtml(quote).replace(/ — /g, "<br>— ")}</div>
         <div class="generated-by">
           Print your own <strong>token receipts</strong> with<br>
           <a href="${GITHUB_URL}" style="color: #333;">github.com/cat-xierluo/token-receipts</a>
@@ -510,8 +510,9 @@ ${this.sharedCss()}
     .logo {
       --logo-font-size: 20px;
       --logo-line-height: 1.2;
+      --logo-scale: 1;
       width: 35ch;
-      height: 96px;
+      height: 120px;
       overflow: hidden;
       font-size: var(--logo-font-size);
       line-height: var(--logo-line-height);
@@ -522,11 +523,14 @@ ${this.sharedCss()}
       justify-content: center;
       margin: 10px auto;
       text-align: left;
+      transform: scale(var(--logo-scale));
+      transform-origin: center;
     }
 
     .logo-openai {
-      --logo-font-size: 7px;
-      --logo-line-height: 0.74;
+      --logo-font-size: 20px;
+      --logo-line-height: 1.2;
+      --logo-scale: 0.45;
     }
 
     .logo-deepseek {
@@ -539,14 +543,19 @@ ${this.sharedCss()}
       --logo-line-height: 0.78;
     }
 
+    .logo-glm {
+      --logo-font-size: 8.5px;
+      --logo-line-height: 0.84;
+    }
+
     .logo-qwen {
       --logo-font-size: 6.2px;
       --logo-line-height: 0.70;
     }
 
     .logo-kimi {
-      --logo-font-size: 9px;
-      --logo-line-height: 0.95;
+      --logo-font-size: 8px;
+      --logo-line-height: 0.72;
     }
 
     .separator {
