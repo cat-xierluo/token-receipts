@@ -9,7 +9,8 @@
 - **多模型定价**：内置 64 个模型定价条目，覆盖 Claude/DeepSeek/GLM/MiniMax/OpenAI/Qwen/Kimi 七家供应商
 - **双币种**：USD 和 CNY 自动切换，国产模型显示人民币价格
 - **供应商 logo**：收据根据模型自动匹配对应供应商的 ASCII logo
-- **Codex CLI 支持**：自动解析 `~/.codex/sessions/` 下的 OpenAI Codex 会话，生成带 OpenAI logo 的收据
+- **Codex CLI 支持**：自动解析 Codex 会话（含归档会话），生成带 OpenAI logo 的收据
+- **日报/月报**：`daily` 和 `monthly` 命令汇总多个会话，多币种费用统一换算为 CNY
 - **Transcript 直读**：直接从 `~/.claude/projects/` 的 JSONL 文件读取 token 数据，不依赖 ccusage
 - **喵喵机打印**：支持通过 BLE 蓝牙连接 MXW01 热敏打印机，直接打印收据到纸上
 - **自动保存到桌面**：HTML 收据生成后自动保存到 `~/Desktop/`
@@ -77,7 +78,25 @@ npx token-receipts daily --date yesterday
 npx token-receipts daily --output bt
 ```
 
-自动扫描 Claude Code 和 Codex CLI 的会话，汇总当天所有模型的 token 用量和费用。
+自动扫描 Claude Code 和 Codex CLI 的会话，汇总当天所有模型的 token 用量和费用。多币种费用统一换算为 CNY 显示。
+
+### `monthly`
+
+```bash
+# 本月汇总
+npx token-receipts monthly
+
+# 上个月
+npx token-receipts monthly --month last-month
+
+# 指定月份
+npx token-receipts monthly --month 2026-05
+
+# 打印到喵喵机
+npx token-receipts monthly --output bt
+```
+
+汇总指定月份所有会话的 token 用量和费用，格式与日报一致。
 
 ### `setup`
 
@@ -130,9 +149,11 @@ npx token-receipts daily --output bt
 
 除了 Claude Code，也支持解析 [OpenAI Codex CLI](https://github.com/openai/codex) 的会话文件。Codex 的 session 存储在 `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl`，格式与 Claude 不同，但 token 用量和费用计算方式一致。
 
+Codex 会话归档后移至 `~/.codex/archived_sessions/`，`daily` 和 `monthly` 命令会自动扫描该目录，已归档的会话也会被纳入汇总。
+
 使用方式：
 - `--session` 直接指定 Codex JSONL 文件路径，自动检测格式
-- `daily` 命令同时扫描 Claude 和 Codex 会话并合并汇总
+- `daily` / `monthly` 命令同时扫描 Claude 和 Codex 会话（含归档）并合并汇总
 
 ## 工作原理
 
@@ -151,8 +172,9 @@ npx token-receipts daily --output bt
 - [x] HTML 收据 + 终端 ASCII + 热敏打印
 - [x] 多模型支持（7 家供应商，64 个定价条目）
 - [x] Transcript 直读 + 双币种 + 供应商 logo
-- [x] Codex CLI 会话支持
+- [x] Codex CLI 会话支持（含归档会话）
 - [x] 喵喵机 BLE 蓝牙打印
+- [x] 日报/月报汇总 + 多币种统一换算
 - [ ] 图片导出（PNG/JPEG）
 - [ ] NPM 发布
 
