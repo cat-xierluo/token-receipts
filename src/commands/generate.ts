@@ -9,6 +9,7 @@ import { promisify } from "util";
 import { DataFetcher } from "../core/data-fetcher.js";
 import { TranscriptParser } from "../core/transcript-parser.js";
 import { TranscriptDataFetcher } from "../core/transcript-data-fetcher.js";
+import { CodexDataFetcher } from "../core/codex-data-fetcher.js";
 import { ReceiptGenerator } from "../core/receipt-generator.js";
 import { HtmlRenderer } from "../core/html-renderer.js";
 import { ThermalPrinterRenderer } from "../core/thermal-printer.js";
@@ -33,6 +34,7 @@ export class GenerateCommand {
   private dataFetcher = new DataFetcher();
   private transcriptParser = new TranscriptParser();
   private transcriptDataFetcher = new TranscriptDataFetcher();
+  private codexDataFetcher = new CodexDataFetcher();
   private receiptGenerator = new ReceiptGenerator();
   private htmlRenderer = new HtmlRenderer();
   private thermalPrinter = new ThermalPrinterRenderer();
@@ -55,6 +57,14 @@ export class GenerateCommand {
         actualSessionId = stdinData.session_id;
       }
 
+      // If --session looks like a direct file path, use it as transcriptPath
+      if (!transcriptPath && options.session) {
+        const expanded = options.session.replace(/^~/, process.env.HOME || "");
+        if (existsSync(expanded) && expanded.endsWith(".jsonl")) {
+          transcriptPath = expanded;
+        }
+      }
+
       // Load config
       const config = await this.configManager.loadConfig();
 
@@ -63,10 +73,12 @@ export class GenerateCommand {
       let transcriptData;
 
       if (transcriptPath) {
-        // 有 transcriptPath 时（来自 hook 或推断），直接读取
-        spinner.text = "Reading transcript...";
+        // Auto-detect: Codex vs Claude session
+        const isCodexSession = transcriptPath.includes("/.codex/sessions/");
+        const fetcher = isCodexSession ? this.codexDataFetcher : this.transcriptDataFetcher;
+        spinner.text = isCodexSession ? "Reading Codex transcript..." : "Reading transcript...";
         const result =
-          await this.transcriptDataFetcher.fetchFromTranscript(transcriptPath);
+          await fetcher.fetchFromTranscript(transcriptPath);
         sessionData = result.sessionData;
         transcriptData = result.transcriptData;
       } else {

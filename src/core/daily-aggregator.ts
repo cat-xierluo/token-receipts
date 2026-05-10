@@ -5,9 +5,12 @@ import type {
   DailySessionEntry,
 } from "../types/daily.js";
 import { TranscriptParser } from "./transcript-parser.js";
+import { CodexParser } from "./codex-parser.js";
+import type { ParsedTranscript } from "../types/transcript.js";
 
 export class DailyAggregator {
-  private parser = new TranscriptParser();
+  private claudeParser = new TranscriptParser();
+  private codexParser = new CodexParser();
 
   async aggregate(filePaths: string[], targetDate: string): Promise<DailySummary> {
     const sessions: DailySessionEntry[] = [];
@@ -15,7 +18,9 @@ export class DailyAggregator {
 
     for (const fp of filePaths) {
       try {
-        const parsed = await this.parser.parseTranscript(fp);
+        const isCodex = fp.includes("/.codex/sessions/");
+        const parser = isCodex ? this.codexParser : this.claudeParser;
+        const parsed: ParsedTranscript = await parser.parseTranscript(fp);
 
         // Only include sessions that overlap with the target date
         if (!this.overlapsDate(parsed.startTime, parsed.endTime, targetDate)) continue;

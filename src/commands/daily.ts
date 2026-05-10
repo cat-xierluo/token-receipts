@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import { exec } from "child_process";
 import { SessionDiscoverer } from "../core/session-discoverer.js";
+import { CodexDiscoverer } from "../core/codex-discoverer.js";
 import { DailyAggregator } from "../core/daily-aggregator.js";
 import { ReceiptGenerator } from "../core/receipt-generator.js";
 import { HtmlRenderer } from "../core/html-renderer.js";
@@ -27,8 +28,13 @@ export class DailyCommand {
     const configManager = new ConfigManager();
     const config = await configManager.loadConfig();
 
-    const discoverer = new SessionDiscoverer();
-    const files = await discoverer.discoverSessions(targetDate);
+    const claudeDiscoverer = new SessionDiscoverer();
+    const codexDiscoverer = new CodexDiscoverer();
+    const [claudeFiles, codexFiles] = await Promise.all([
+      claudeDiscoverer.discoverSessions(targetDate),
+      codexDiscoverer.discoverSessions(targetDate),
+    ]);
+    const files = [...claudeFiles, ...codexFiles];
 
     if (files.length === 0) {
       console.log(chalk.yellow(`No sessions found for ${targetDate}.`));
@@ -40,7 +46,12 @@ export class DailyCommand {
       return;
     }
 
-    console.log(chalk.gray(`  Found ${files.length} session(s)`));
+    const claudeCount = claudeFiles.length;
+    const codexCount = codexFiles.length;
+    const parts = [`${files.length} session(s)`];
+    if (claudeCount) parts.push(`${claudeCount} Claude`);
+    if (codexCount) parts.push(`${codexCount} Codex`);
+    console.log(chalk.gray(`  Found ${parts.join(" · ")}`));
 
     const aggregator = new DailyAggregator();
     const summary = await aggregator.aggregate(files, targetDate);
