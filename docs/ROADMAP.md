@@ -14,7 +14,7 @@
 | 阶段二：热敏打印 | Epson TM-T88V 支持 | ✅ 已完成 | |
 | 阶段三：多模型支持 | 多供应商 + Transcript 直读 | ✅ 已完成 | 8 供应商、64 定价条目 |
 | 阶段四：打印与汇总 | 喵喵机 BLE + 日报/月报 + Codex | ✅ 已完成 | |
-| 阶段五：发布与打磨 | NPM 发布、文档完善 | 🔄 进行中 | |
+| 阶段五：发布与打磨 | NPM 发布、文档完善 | ✅ 已完成 | v2.0.1 |
 | 阶段六：图片导出 | PNG/JPEG 导出 | ⏳ 未开始 | |
 | 阶段七：生态集成 | Opencode 插件 | ⏳ 未开始 | |
 
@@ -50,17 +50,17 @@
 - [x] 多币种统一换算为 CNY（实时汇率 + 24h 缓存）
 - [x] 喵喵机打印布局优化（网址重复、session 溢出、日期截断等修复）
 
-### 阶段五：发布与打磨 🔄
+### 阶段五：发布与打磨 ✅
 
-- [ ] NPM 发布（`token-receipts` v2.0.0）
-  - [ ] 确认 npm 账号和包名可用
-  - [ ] 更新 package.json 版本号（1.1.0 → 2.0.0，架构大改）
-  - [ ] 更新 package.json description 和 keywords
-  - [ ] 运行 `npm publish --access public`
-  - [ ] 验证 `npx token-receipts@latest setup` 可用
-- [ ] 重命名 bin 入口文件 `claude-receipts.js` → `token-receipts.js`
-- [ ] 清理 docs/status 目录结构（已完成）
-- [ ] 推送到 GitHub 远程
+- [x] NPM 发布（`token-receipts` v2.0.1）
+  - [x] 确认 npm 账号和包名可用
+  - [x] 更新 package.json 版本号（1.1.0 → 2.0.1）
+  - [x] 更新 package.json description 和 keywords
+  - [x] 运行 `npm publish --access public`
+  - [x] 验证 `npx token-receipts@latest setup` 可用
+- [x] 重命名 bin 入口文件 `claude-receipts.js` → `token-receipts.js`
+- [x] 清理 docs/status 目录结构
+- [x] 推送到 GitHub 远程
 
 ### 阶段六：图片导出 ⏳
 
