@@ -338,7 +338,7 @@ export class ReceiptGenerator {
     lines.push(
       this.padLine("TOTAL", "", formatCurrency(summary.totalCostCNY, "¥")),
     );
-    if (summary.exchangeRate) {
+    if (summary.hasUsdModel && summary.exchangeRate) {
       lines.push(
         this.centerText(`(USD→CNY: ${summary.exchangeRate.toFixed(2)})`, 35),
       );

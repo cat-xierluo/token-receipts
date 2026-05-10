@@ -65,9 +65,11 @@ export class DailyAggregator {
     const totalCost = modelSummaries.reduce((s, m) => s + m.estimatedCost, 0);
 
     // Convert all costs to CNY for unified total
+    let hasUsdModel = false;
     const totalCostCNY = modelSummaries.reduce((s, m) => {
       const pricing = getModelPrice(m.modelName);
       const isUsd = pricing?.currency === "USD";
+      if (isUsd) hasUsdModel = true;
       return s + (isUsd ? m.estimatedCost * exchangeRate : m.estimatedCost);
     }, 0);
     const totalTokens = modelSummaries.reduce((s, m) => s + m.totalTokens, 0);
@@ -125,6 +127,7 @@ export class DailyAggregator {
       allModelsUsed: [...new Set(sessions.flatMap((s) => s.modelsUsed))],
       totalCostCNY,
       exchangeRate,
+      hasUsdModel,
     };
   }
 

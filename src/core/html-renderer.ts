@@ -384,7 +384,7 @@ ${this.sharedCss()}
           <span>TOTAL</span>
           <span>${formatCurrency(summary.totalCostCNY, "¥")}</span>
         </div>
-        ${summary.exchangeRate ? `<div class="exchange-rate-note">(USD→CNY: ${summary.exchangeRate.toFixed(2)})</div>` : ""}
+        ${summary.hasUsdModel && summary.exchangeRate ? `<div class="exchange-rate-note">(USD→CNY: ${summary.exchangeRate.toFixed(2)})</div>` : ""}
       </div>
 
       <div class="footer">

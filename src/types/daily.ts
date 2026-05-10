@@ -31,6 +31,7 @@ export interface DailySummary {
   allModelsUsed: string[];
   totalCostCNY: number;
   exchangeRate: number;
+  hasUsdModel: boolean;
 }
 
 export interface DailySummaryData {
