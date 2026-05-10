@@ -3,6 +3,7 @@
 import { Command, Option } from "commander";
 import { GenerateCommand } from "./commands/generate.js";
 import { DailyCommand } from "./commands/daily.js";
+import { MonthlyCommand } from "./commands/monthly.js";
 import { ConfigCommand } from "./commands/config.js";
 import { SetupCommand } from "./commands/setup.js";
 
@@ -50,6 +51,21 @@ program
   .option("-l, --location <text>", "Override location detection")
   .action(async (options) => {
     const command = new DailyCommand();
+    const outputs = options.output
+      ? options.output.split(",").map((s: string) => s.trim())
+      : ["console"];
+    await command.execute({ ...options, output: outputs });
+  });
+
+// Monthly command
+program
+  .command("monthly")
+  .description("Generate a monthly summary receipt for all sessions")
+  .option("-m, --month <month>", "Target month (YYYY-MM, 'this-month', 'last-month'). Defaults to this month")
+  .option("-o, --output <formats>", "Output format: html, console, bt (comma-separated)")
+  .option("-l, --location <text>", "Override location detection")
+  .action(async (options) => {
+    const command = new MonthlyCommand();
     const outputs = options.output
       ? options.output.split(",").map((s: string) => s.trim())
       : ["console"];

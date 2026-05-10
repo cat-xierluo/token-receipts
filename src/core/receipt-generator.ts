@@ -363,4 +363,96 @@ export class ReceiptGenerator {
 
     return lines.join("\n");
   }
+
+  generateMonthlyReceipt(data: DailySummaryData): string {
+    const lines: string[] = [];
+    const { summary, location, config } = data;
+
+    lines.push(SEPARATOR);
+    lines.push(getHeader("anthropic"));
+    lines.push(SEPARATOR);
+    lines.push("");
+    lines.push(this.centerText("MONTHLY SUMMARY", 35));
+    lines.push(this.centerText(summary.date, 35));
+    lines.push("");
+
+    const earliest = summary.earliestStart;
+    const latest = summary.latestEnd;
+    const fmt = (d: Date) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+    lines.push(this.centerText(`${fmt(earliest)} ~ ${fmt(latest)}`, 35));
+
+    lines.push(
+      this.centerText(
+        `${summary.sessionCount} sessions`,
+        35,
+      ),
+    );
+    lines.push(this.centerText(`Location: ${location}`, 35));
+    lines.push("");
+
+    // Model breakdown
+    lines.push(SEPARATOR);
+    lines.push(this.padLine("ITEM", "QTY", "PRICE"));
+    lines.push(LIGHT_SEPARATOR);
+
+    for (const model of summary.modelSummaries) {
+      const sym = getCurrencySymbol(model.modelName);
+      lines.push(model.displayName);
+
+      lines.push(
+        this.padLine("  Input tokens", formatNumber(model.inputTokens), ""),
+      );
+      lines.push(
+        this.padLine("  Output tokens", formatNumber(model.outputTokens), ""),
+      );
+
+      if (model.cacheCreationTokens > 0) {
+        lines.push(
+          this.padLine("  Cache write", formatNumber(model.cacheCreationTokens), ""),
+        );
+      }
+      if (model.cacheReadTokens > 0) {
+        lines.push(
+          this.padLine("  Cache read", formatNumber(model.cacheReadTokens), ""),
+        );
+      }
+
+      lines.push(
+        this.padLine("", "", formatCurrency(model.estimatedCost, sym)),
+      );
+      lines.push("");
+    }
+
+    // Totals — unified CNY
+    lines.push(SEPARATOR);
+    lines.push(
+      this.padLine("TOTAL", "", formatCurrency(summary.totalCostCNY, "¥")),
+    );
+    if (summary.hasUsdModel && summary.exchangeRate) {
+      lines.push(
+        this.centerText(`(USD→CNY: ${summary.exchangeRate.toFixed(2)})`, 35),
+      );
+    }
+    lines.push(SEPARATOR);
+    lines.push("");
+
+    lines.push("CASHIER: Monthly Summary");
+    lines.push("");
+    lines.push("");
+
+    const quote = getRandomQuote();
+    const quoteParts = quote.split(" — ");
+    lines.push(this.centerText(quoteParts[0], 35));
+    if (quoteParts[1]) {
+      lines.push(this.centerText(`— ${quoteParts[1]}`, 35));
+    }
+
+    lines.push("");
+    lines.push("");
+    lines.push(SEPARATOR);
+
+    return lines.join("\n");
+  }
 }

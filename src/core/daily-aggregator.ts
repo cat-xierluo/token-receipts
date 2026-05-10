@@ -135,10 +135,18 @@ export class DailyAggregator {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   }
 
-  /** Check if a session's time range overlaps with the target date (local time) */
+  /** Check if a session's time range overlaps with the target date or month (local time) */
   private overlapsDate(start: Date, end: Date, targetDate: string): boolean {
-    // Parse target date as local midnight
-    const [y, m, d] = targetDate.split("-").map(Number);
+    const parts = targetDate.split("-").map(Number);
+    if (parts.length === 2) {
+      // YYYY-MM — monthly mode
+      const [y, m] = parts;
+      const monthStart = new Date(y, m - 1, 1);
+      const monthEnd = new Date(y, m, 0, 23, 59, 59, 999); // last day of month
+      return end >= monthStart && start <= monthEnd;
+    }
+    // YYYY-MM-DD — daily mode
+    const [y, m, d] = parts;
     const dayStart = new Date(y, m - 1, d);
     const dayEnd = new Date(y, m - 1, d, 23, 59, 59, 999);
     return end >= dayStart && start <= dayEnd;

@@ -23,4 +23,31 @@ export class CodexDiscoverer {
       return [];
     }
   }
+
+  async discoverMonthSessions(yearMonth: string): Promise<string[]> {
+    const [y, m] = yearMonth.split("-");
+    const monthDir = join(this.sessionsDir, y, m);
+
+    try {
+      const files: string[] = [];
+      const dayEntries = await readdir(monthDir, { withFileTypes: true });
+      for (const dayDir of dayEntries) {
+        if (!dayDir.isDirectory()) continue;
+        const dayPath = join(monthDir, dayDir.name);
+        try {
+          const entries = await readdir(dayPath, { withFileTypes: true });
+          for (const e of entries) {
+            if (e.isFile() && e.name.endsWith(".jsonl")) {
+              files.push(join(dayPath, e.name));
+            }
+          }
+        } catch {
+          // skip unreadable day dirs
+        }
+      }
+      return files.sort();
+    } catch {
+      return [];
+    }
+  }
 }

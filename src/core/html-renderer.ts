@@ -489,6 +489,157 @@ ${this.sharedCss()}
 </html>`;
   }
 
+  async generateMonthlyHtml(data: DailySummaryData): Promise<string> {
+    const { summary, location } = data;
+    const logo = getLogoRenderData("anthropic");
+    const quote = getRandomQuote();
+    const dateDisplay = summary.date;
+
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monthly Receipt - ${summary.date}</title>
+  <style>
+${this.sharedCss()}
+  </style>
+</head>
+<body>
+  <div class="receipt-container">
+    <div class="receipt">
+      <div class="receipt-edge receipt-edge-top" id="edge-top"></div>
+      <div class="header">
+        <div class="logo" style="${logo.style}">
+          <pre class="logo-mark">${this.escapeHtml(logo.display)}</pre>
+        </div>
+        <div style="text-align:center; margin-top:10px;">
+          <div style="font-size:18px; font-weight:bold; letter-spacing:2px;">MONTHLY SUMMARY</div>
+          <div style="font-size:14px; margin-top:5px;">${dateDisplay}</div>
+        </div>
+        <div class="meta" style="margin-top:15px;">
+          <div class="meta-row">
+            <div>Location</div><div class="dots">....................</div><div class="value">${this.escapeHtml(location)}</div>
+          </div>
+          <div class="meta-row">
+            <div>Sessions</div><div class="dots">....................</div><div class="value">${summary.sessionCount}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="separator"></div>
+
+      ${this.renderDailyLineItems(summary)}
+
+      <div class="total-section">
+        <div class="total">
+          <span>TOTAL</span>
+          <span>${formatCurrency(summary.totalCostCNY, "¥")}</span>
+        </div>
+        ${summary.hasUsdModel && summary.exchangeRate ? `<div class="exchange-rate-note">(USD→CNY: ${summary.exchangeRate.toFixed(2)})</div>` : ""}
+      </div>
+
+      <div class="footer">
+        <div>CASHIER: Monthly Summary</div>
+        <div class="footer-message">${this.escapeHtml(quote).replace(/ — /g, "<br>— ")}</div>
+        <div class="generated-by">
+          Print your own <strong>token receipts</strong> with<br>
+          <a href="${GITHUB_URL}" style="color: #333;">github.com/cat-xierluo/token-receipts</a>
+        </div>
+      </div>
+      <div class="receipt-edge receipt-edge-bottom" id="edge-bottom"></div>
+    </div>
+
+    <div class="actions">
+      <button class="action-btn" id="save-img-btn" onclick="saveAsImage('png')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+        <span id="save-img-btn-text">Save PNG</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    function fitAsciiLogos() {
+      document.querySelectorAll('.logo').forEach((logo) => {
+        const mark = logo.querySelector('.logo-mark');
+        if (!mark) return;
+        mark.style.setProperty('--logo-fit-scale', '1');
+        const boxWidth = logo.clientWidth;
+        const boxHeight = logo.clientHeight;
+        const markWidth = mark.scrollWidth;
+        const markHeight = mark.scrollHeight;
+        if (!boxWidth || !boxHeight || !markWidth || !markHeight) return;
+        const requestedScale = Number.parseFloat(getComputedStyle(mark).getPropertyValue('--logo-scale')) || 1;
+        const measuredScale = Math.min(1, boxWidth / markWidth, boxHeight / markHeight);
+        const nextScale = Math.min(requestedScale, measuredScale < 1 ? measuredScale * 0.96 : 1);
+        mark.style.setProperty('--logo-fit-scale', String(Math.max(0.1, Math.floor(nextScale * 1000) / 1000)));
+      });
+    }
+
+    function fillEdgeStripes(el, offset) {
+      if (!el) return;
+      let html = '';
+      for (let x = offset; x < 540; x += 20) {
+        html += '<div class="stripe" style="left:' + x + 'px"></div>';
+      }
+      el.innerHTML = html;
+    }
+    fillEdgeStripes(document.getElementById('edge-top'), 0);
+    fillEdgeStripes(document.getElementById('edge-bottom'), 10);
+    fitAsciiLogos();
+    window.addEventListener('load', fitAsciiLogos);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') window.close();
+    });
+
+    console.log('Monthly Receipt Generated!');
+    console.log('Month:', '${summary.date}');
+    console.log('Sessions:', ${summary.sessionCount});
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+  <script>
+    async function saveAsImage(format) {
+      const btn = document.getElementById('save-img-btn');
+      const btnText = document.getElementById('save-img-btn-text');
+      btn.disabled = true;
+      btnText.textContent = 'Saving...';
+
+      try {
+        fitAsciiLogos();
+        const receipt = document.querySelector('.receipt');
+        const dataUrl = await htmlToImage.toPng(receipt, {
+          quality: 1,
+          pixelRatio: 3,
+          backgroundColor: '#ffffff',
+          style: { boxShadow: 'none', animation: 'none' },
+        });
+
+        const link = document.createElement('a');
+        link.download = 'monthly-${summary.date}.' + format;
+        link.href = dataUrl;
+        link.click();
+
+        btnText.textContent = 'Saved!';
+        btn.classList.add('success');
+        setTimeout(() => { btn.disabled = false; btn.classList.remove('success'); btnText.textContent = 'Save PNG'; }, 2000);
+      } catch (err) {
+        console.error('Save image failed:', err);
+        btnText.textContent = 'Failed';
+        btn.classList.add('error');
+        setTimeout(() => { btn.disabled = false; btn.classList.remove('error'); btnText.textContent = 'Save PNG'; }, 2000);
+      }
+    }
+  </script>
+</body>
+</html>`;
+  }
+
   private sharedCss(): string {
     return `    * {
       margin: 0;
