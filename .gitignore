@@ -14,3 +14,4 @@ dist/
 
 # Dev docs
 docs/archive/
+.npmrc

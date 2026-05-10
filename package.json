@@ -1,40 +1,49 @@
 {
   "name": "token-receipts",
-  "version": "1.1.0",
-  "description": "Bring receipts from your Claude Code sessions",
+  "version": "2.0.0",
+  "description": "Thermal-receipt style usage reports for AI coding sessions (Claude Code, OpenAI Codex CLI). Multi-model pricing, dual currency, BLE thermal printing.",
   "license": "MIT",
   "author": "Chris Hutchinson <github.com/chrishutchinson>",
+  "contributors": [
+    "maoking <github.com/cat-xierluo>"
+  ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrishutchinson/token-receipts.git"
+    "url": "git+https://github.com/cat-xierluo/token-receipts.git"
   },
   "bugs": {
-    "url": "https://github.com/chrishutchinson/token-receipts/issues"
+    "url": "https://github.com/cat-xierluo/token-receipts/issues"
   },
-  "homepage": "https://github.com/chrishutchinson/token-receipts#readme",
+  "homepage": "https://github.com/cat-xierluo/token-receipts#readme",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "token-receipts": "./bin/claude-receipts.js"
+    "token-receipts": "bin/token-receipts.js"
   },
   "files": [
     "dist",
-    "bin",
-    "templates"
+    "bin"
   ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
+    "preview:logos": "npm run build && node scripts/generate-ascii-logo-preview.mjs",
     "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "claude-code",
+    "codex",
     "receipt",
-    "usage",
+    "token-usage",
     "ai",
-    "cli"
+    "cli",
+    "thermal-printer",
+    "deepseek",
+    "glm",
+    "qwen",
+    "kimi"
   ],
   "engines": {
     "node": ">=22.0.0"

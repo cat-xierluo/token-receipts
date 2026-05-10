@@ -1,0 +1,6 @@
+docs/
+scripts/
+*.mjs
+.gitignore
+CLAUDE.md
+tsconfig.json

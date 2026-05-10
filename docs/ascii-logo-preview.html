@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASCII Logo Preview - token-receipts</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #2f2f2f;
+      color: #222;
+      font-family: "Courier New", Courier, monospace;
+      padding: 32px;
+    }
+
+    .page {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      color: #f8f8f8;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .source {
+      margin: 0;
+      color: #d8d8d8;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .source code {
+      color: #fff;
+      background: #1e1e1e;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+      gap: 28px;
+      align-items: start;
+    }
+
+    .preview-card,
+    .raw-gallery {
+      background: #f8f8f8;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.22);
+    }
+
+    .preview-card {
+      padding: 18px 16px 22px;
+    }
+
+    .provider {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 10px;
+      border-bottom: 1px dashed #aaa;
+      padding-bottom: 8px;
+    }
+
+    .provider h2 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+
+    .width {
+      color: #666;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .receipt {
+      background: #f8f8f8;
+      width: 480px;
+      padding: 45px 20px;
+      position: relative;
+      color: #222;
+      font-size: 20px;
+      line-height: 1.25;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+
+    .receipt pre,
+    .raw-card pre {
+      margin: 0;
+      font-family: "Courier New", Courier, monospace;
+      white-space: pre;
+    }
+
+    .receipt pre {
+      font-size: inherit;
+      line-height: inherit;
+    }
+
+    .logo {
+      --logo-font-size: 20px;
+      --logo-line-height: 1.2;
+      --logo-scale: 1;
+      width: 35ch;
+      height: 120px;
+      overflow: hidden;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 10px auto;
+      text-align: left;
+    }
+
+    .logo .logo-mark {
+      margin: 0;
+      font: inherit;
+      font-size: var(--logo-font-size);
+      line-height: var(--logo-line-height);
+      white-space: pre;
+      flex: 0 0 auto;
+      transform: scale(var(--logo-fit-scale, var(--logo-scale)));
+      transform-origin: center;
+    }
+
+    .raw-gallery {
+      margin-top: 36px;
+      padding: 24px;
+    }
+
+    .raw-gallery h2 {
+      font-size: 18px;
+      margin: 0 0 16px 0;
+    }
+
+    .raw-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .raw-card {
+      border: 1px dashed #aaa;
+      padding: 12px;
+      min-height: 142px;
+      overflow: hidden;
+    }
+
+    .raw-title {
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 8px;
+    }
+
+    .raw-card pre {
+      font-size: 8px;
+      line-height: 0.86;
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <h1>ASCII Logo Preview</h1>
+      <p class="source">
+        Generated from <code>src/utils/ascii-art.ts</code>. Run <code>npm run preview:logos</code> after editing logo source data.
+      </p>
+    </header>
+
+    <section class="grid">
+      <article class="preview-card">
+    <div class="provider">
+      <h2>Anthropic / Claude</h2>
+      <div class="width">16 cols x 5 rows · 20px</div>
+    </div>
+    <div class="receipt">
+      <pre>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</pre>
+      <div class="logo" style="--logo-font-size:20px;--logo-line-height:1.2;--logo-scale:1;">
+        <pre class="logo-mark">  ▐██████████▌
+  ▐██ ████ ██▌
+▐██████████████▌
+  ▐██████████▌
+    ▀ ▀  ▀ ▀</pre>
+      </div>
+      <pre>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          Location: Preview
+          Provider: anthropic
+───────────────────────────────────
+ITEM                 QTY      PRICE
+Input tokens       12,345    $0.12
+Output tokens       6,789    $0.34
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</pre>
+    </div>
+  </article>
+<article class="preview-card">
+    <div class="provider">
+      <h2>OpenAI</h2>
+      <div class="width">30 cols x 17 rows · 8.5px</div>
+    </div>
+    <div class="receipt">
+      <pre>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</pre>
+      <div class="logo" style="--logo-font-size:20px;--logo-line-height:0.78;--logo-scale:0.425;">
+        <pre class="logo-mark">        ▗▄█████▙▄
+      ▗▟█▛▀▀▀▀▀▜███████▄▖
+     ▗██▘   ▗▄███▀▀▀▀▀▀██▙▖
+   ▗▄▟█▌  ▄███▀▘  ▗▄▖   ▀██▖
+ ▗▟████▌ ▐██▘  ▗▄█████▄▖ ▐█▌
+▗██▀ ██▌ ▐█▙▗▄███▛▘ ▝▀███▟█▛
+▟█▌  ██▌ ▐████▀▀███▄▖  ▝▀██▙▖
+██   ██▌ ▐█▛▘    ▝▜███▄▖  ▀██▖
+▜█▌  ▜██▄▟█▌      ▐█▛▀██▙  ▐█▙
+▝██▄  ▝▀███▙▖    ▗▟█▌ ▐██   ██
+ ▝▜██▄▖  ▝▀███▄▄████▌ ▐██  ▐█▛
+  ▟█▛███▄▖ ▗▟███▀▘▜█▌ ▐██ ▄██▘
+  ▐█▌ ▝▀█████▀▘  ▗██▌ ▐████▛▘
+  ▝██▖   ▝▀▘  ▗▄███▀  ▐█▛▀▘
+   ▝▜██▄▄▄▄▄▄███▀▘   ▗██▘
+     ▝▀███████▙▄▄▄▄▄▟█▛▘
+             ▀▜█████▀▘</pre>
+      </div>
+      <pre>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          Location: Preview
+          Provider: openai
+───────────────────────────────────
+ITEM                 QTY      PRICE
+Input tokens       12,345    $0.12
+Output tokens       6,789    $0.34
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</pre>
+    </div>
+  </article>
+<article class="preview-card">
+    <div class="provider">
+      <h2>DeepSeek</h2>
+      <div class="width">28 cols x 12 rows · 11.46px</div>
+    </div>
+    <div class="receipt">
+      <pre>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</pre>
+      <div class="logo" style="--logo-font-size:20px;--logo-line-height:0.82;--logo-scale:0.573;">
+        <pre class="logo-mark">      ▗▄▄▄▄▄▄██▖   █▙
+   ▄██████████▙   ▐███▄ ▄▄▄█
+ ▗██████████████▄  █████████
+▗█████████████████▖▝▜██████▘
+▟██▀▜███████████████▄███▀▘
+██▌    ▝▀███████▛▜██████
+███       ▀█████▙ ▜████▌
+▐██▙       ▝▜██████████
+ ███▙    ▗▖  ▜████████▘
+ ▝▜███▄  ▜██▄ ▀█████▛
+   ▀██████████▙▄██████▌
+     ▀▜█████████▀▘▝▀▀▀</pre>
+      </div>
+      <pre>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          Location: Preview
+          Provider: deepseek
+───────────────────────────────────
+ITEM                 QTY      PRICE
+Input tokens       12,345    $0.12
+Output tokens       6,789    $0.34
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</pre>
+    </div>
+  </article>
+<article class="preview-card">
+    <div class="provider">
+      <h2>Z.ai / GLM</h2>
+      <div class="width">18 cols x 12 rows · 10.44px</div>
+    </div>
+    <div class="receipt">
+      <pre>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</pre>
+      <div class="logo" style="--logo-font-size:20px;--logo-line-height:0.9;--logo-scale:0.522;">
+        <pre class="logo-mark">██████████████████
+██████████████████
+
+             █████
+           █████
+         █████
+       █████
+     █████
+   █████
+
+██████████████████
+██████████████████</pre>
+      </div>
+      <pre>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          Location: Preview
+          Provider: glm
+───────────────────────────────────
+ITEM                 QTY      PRICE
+Input tokens       12,345    $0.12
+Output tokens       6,789    $0.34
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</pre>
+    </div>
+  </article>
+<article class="preview-card">
+    <div class="provider">
+      <h2>MiniMax</h2>
+      <div class="width">32 cols x 13 rows · 11.12px</div>
+    </div>
+    <div class="receipt">
+      <pre>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</pre>
+      <div class="logo" style="--logo-font-size:20px;--logo-line-height:0.78;--logo-scale:0.556;">
+        <pre class="logo-mark">           ▗████▖  ▄███▙▖
+           ██  ██  ██ ▐█▌
+           ██  ██  ██ ▐█▌
+    ▄▟█▙▖  ██  ██  ██ ▐█▌  ▄▟█▙▖
+   ▐█▛ ▜█▖ ██  ██  ██ ▐█▌ ▐█▛▝▜█
+▗  ▐█▌ ▐█▌ ██  ██  ██ ▐█▌ ▐█▌ ▐█
+█▌ ▐█▌ ▐█▌ ██  ██  ██ ▐█▌ ▐█▌ ▐█
+██▄▟█▘ ▐█▌ ██  ██  ██ ▐█▌ ▐█▌ ▐█
+ ▀▀▀▘  ▐█▌ ██  ██  ██ ▐█▌ ▐█▌ ▐█
+       ▐█▌ ██  ▝▘  ██ ▐█▌ ▐█▌ ▝▀
+       ▐█▌ ▟█  ██  ██  ▀███▀
+        ▜███▀  ██  ██
+               ▀████▘</pre>
+      </div>
+      <pre>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          Location: Preview
+          Provider: minimax
+───────────────────────────────────
+ITEM                 QTY      PRICE
+Input tokens       12,345    $0.12
+Output tokens       6,789    $0.34
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</pre>
+    </div>
+  </article>
+<article class="preview-card">
+    <div class="provider">
+      <h2>Qwen</h2>
+      <div class="width">32 cols x 18 rows · 8.94px</div>
+    </div>
+    <div class="receipt">
+      <pre>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</pre>
+      <div class="logo" style="--logo-font-size:20px;--logo-line-height:0.7;--logo-scale:0.447;">
+        <pre class="logo-mark">          ▗██████▖
+         ▗█▘▝█████▖
+        ▗█▘  ▐█████████████▙
+       ▗█▘   ▟██████████████▙
+  ▄█████▘   ▟████████████████▙
+ ▟██▖                      ▗█▘
+▟████▖                     █▘
+▜█████▖    ▜████████▛      ▜▖
+ ▜█████▖    ▜██████▛        ▜▖
+  ▜█████▖    ▜████▛    ▗█▖   ▜▖
+   ▜█████▖    ▜██▛    ▗███▖   ▜▄
+   ▗██████▖    ▜▛    ▗█████████▛
+  ▗████████▖        ▗█████████▛
+  ▜████▀▀▀▀▘       ▗█████████▛
+   ▜██▘           ▗█████▛
+    ▜█████████▖  ▗█████▛
+             ▝█▖▗█████▛
+              ▝██████▛</pre>
+      </div>
+      <pre>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          Location: Preview
+          Provider: qwen
+───────────────────────────────────
+ITEM                 QTY      PRICE
+Input tokens       12,345    $0.12
+Output tokens       6,789    $0.34
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</pre>
+    </div>
+  </article>
+<article class="preview-card">
+    <div class="provider">
+      <h2>Kimi</h2>
+      <div class="width">18 cols x 14 rows · 11.18px</div>
+    </div>
+    <div class="receipt">
+      <pre>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</pre>
+      <div class="logo" style="--logo-font-size:20px;--logo-line-height:0.72;--logo-scale:0.559;">
+        <pre class="logo-mark">              ▗██▙
+              ▐███
+▄▄▖      ▗▄▄▄▖▝█▛▘
+███     ▄███▛
+███    ▟███▘
+███  ▗████▘
+███ ▗███▛
+███▟███▀
+███████▙▖
+█████████▄
+███▛▘ ▜████▄
+███    ▝▜████▄
+███      ▀████
+███        ▀██</pre>
+      </div>
+      <pre>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          Location: Preview
+          Provider: kimi
+───────────────────────────────────
+ITEM                 QTY      PRICE
+Input tokens       12,345    $0.12
+Output tokens       6,789    $0.34
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</pre>
+    </div>
+  </article>
+<article class="preview-card">
+    <div class="provider">
+      <h2>Unknown fallback</h2>
+      <div class="width">12 cols x 4 rows · 20px</div>
+    </div>
+    <div class="receipt">
+      <pre>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</pre>
+      <div class="logo" style="--logo-font-size:20px;--logo-line-height:1;--logo-scale:1;">
+        <pre class="logo-mark">   ▄██████▄
+  ██  ██  ██
+  ██  ██  ██
+   ▀██████▀</pre>
+      </div>
+      <pre>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          Location: Preview
+          Provider: unknown
+───────────────────────────────────
+ITEM                 QTY      PRICE
+Input tokens       12,345    $0.12
+Output tokens       6,789    $0.34
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</pre>
+    </div>
+  </article>
+    </section>
+
+    <section class="raw-gallery">
+      <h2>Raw ASCII Marks</h2>
+      <div class="raw-grid">
+        <article class="raw-card">
+    <div class="raw-title">Anthropic / Claude · 16 cols x 5 rows</div>
+    <pre>▐██████████▌
+▐██ ████ ██▌
+▐██████████████▌
+▐██████████▌
+▀ ▀  ▀ ▀</pre>
+  </article>
+<article class="raw-card">
+    <div class="raw-title">OpenAI · 30 cols x 17 rows</div>
+    <pre>        ▗▄█████▙▄
+      ▗▟█▛▀▀▀▀▀▜███████▄▖
+     ▗██▘   ▗▄███▀▀▀▀▀▀██▙▖
+   ▗▄▟█▌  ▄███▀▘  ▗▄▖   ▀██▖
+ ▗▟████▌ ▐██▘  ▗▄█████▄▖ ▐█▌
+▗██▀ ██▌ ▐█▙▗▄███▛▘ ▝▀███▟█▛
+▟█▌  ██▌ ▐████▀▀███▄▖  ▝▀██▙▖
+██   ██▌ ▐█▛▘    ▝▜███▄▖  ▀██▖
+▜█▌  ▜██▄▟█▌      ▐█▛▀██▙  ▐█▙
+▝██▄  ▝▀███▙▖    ▗▟█▌ ▐██   ██
+ ▝▜██▄▖  ▝▀███▄▄████▌ ▐██  ▐█▛
+  ▟█▛███▄▖ ▗▟███▀▘▜█▌ ▐██ ▄██▘
+  ▐█▌ ▝▀█████▀▘  ▗██▌ ▐████▛▘
+  ▝██▖   ▝▀▘  ▗▄███▀  ▐█▛▀▘
+   ▝▜██▄▄▄▄▄▄███▀▘   ▗██▘
+     ▝▀███████▙▄▄▄▄▄▟█▛▘
+             ▀▜█████▀▘</pre>
+  </article>
+<article class="raw-card">
+    <div class="raw-title">DeepSeek · 28 cols x 12 rows</div>
+    <pre>      ▗▄▄▄▄▄▄██▖   █▙
+   ▄██████████▙   ▐███▄ ▄▄▄█
+ ▗██████████████▄  █████████
+▗█████████████████▖▝▜██████▘
+▟██▀▜███████████████▄███▀▘
+██▌    ▝▀███████▛▜██████
+███       ▀█████▙ ▜████▌
+▐██▙       ▝▜██████████
+ ███▙    ▗▖  ▜████████▘
+ ▝▜███▄  ▜██▄ ▀█████▛
+   ▀██████████▙▄██████▌
+     ▀▜█████████▀▘▝▀▀▀</pre>
+  </article>
+<article class="raw-card">
+    <div class="raw-title">Z.ai / GLM · 18 cols x 12 rows</div>
+    <pre>██████████████████
+██████████████████
+
+             █████
+           █████
+         █████
+       █████
+     █████
+   █████
+
+██████████████████
+██████████████████</pre>
+  </article>
+<article class="raw-card">
+    <div class="raw-title">MiniMax · 32 cols x 13 rows</div>
+    <pre>           ▗████▖  ▄███▙▖
+           ██  ██  ██ ▐█▌
+           ██  ██  ██ ▐█▌
+    ▄▟█▙▖  ██  ██  ██ ▐█▌  ▄▟█▙▖
+   ▐█▛ ▜█▖ ██  ██  ██ ▐█▌ ▐█▛▝▜█
+▗  ▐█▌ ▐█▌ ██  ██  ██ ▐█▌ ▐█▌ ▐█
+█▌ ▐█▌ ▐█▌ ██  ██  ██ ▐█▌ ▐█▌ ▐█
+██▄▟█▘ ▐█▌ ██  ██  ██ ▐█▌ ▐█▌ ▐█
+ ▀▀▀▘  ▐█▌ ██  ██  ██ ▐█▌ ▐█▌ ▐█
+       ▐█▌ ██  ▝▘  ██ ▐█▌ ▐█▌ ▝▀
+       ▐█▌ ▟█  ██  ██  ▀███▀
+        ▜███▀  ██  ██
+               ▀████▘</pre>
+  </article>
+<article class="raw-card">
+    <div class="raw-title">Qwen · 32 cols x 18 rows</div>
+    <pre>          ▗██████▖
+         ▗█▘▝█████▖
+        ▗█▘  ▐█████████████▙
+       ▗█▘   ▟██████████████▙
+  ▄█████▘   ▟████████████████▙
+ ▟██▖                      ▗█▘
+▟████▖                     █▘
+▜█████▖    ▜████████▛      ▜▖
+ ▜█████▖    ▜██████▛        ▜▖
+  ▜█████▖    ▜████▛    ▗█▖   ▜▖
+   ▜█████▖    ▜██▛    ▗███▖   ▜▄
+   ▗██████▖    ▜▛    ▗█████████▛
+  ▗████████▖        ▗█████████▛
+  ▜████▀▀▀▀▘       ▗█████████▛
+   ▜██▘           ▗█████▛
+    ▜█████████▖  ▗█████▛
+             ▝█▖▗█████▛
+              ▝██████▛</pre>
+  </article>
+<article class="raw-card">
+    <div class="raw-title">Kimi · 18 cols x 14 rows</div>
+    <pre>              ▗██▙
+              ▐███
+▄▄▖      ▗▄▄▄▖▝█▛▘
+███     ▄███▛
+███    ▟███▘
+███  ▗████▘
+███ ▗███▛
+███▟███▀
+███████▙▖
+█████████▄
+███▛▘ ▜████▄
+███    ▝▜████▄
+███      ▀████
+███        ▀██</pre>
+  </article>
+<article class="raw-card">
+    <div class="raw-title">Unknown fallback · 12 cols x 4 rows</div>
+    <pre>   ▄██████▄
+  ██  ██  ██
+  ██  ██  ██
+   ▀██████▀</pre>
+  </article>
+      </div>
+    </section>
+  </main>
+  <script>
+    function fitAsciiLogos() {
+      document.querySelectorAll('.logo').forEach((logo) => {
+        const mark = logo.querySelector('.logo-mark');
+        if (!mark) return;
+        mark.style.setProperty('--logo-fit-scale', '1');
+        const boxWidth = logo.clientWidth;
+        const boxHeight = logo.clientHeight;
+        const markWidth = mark.scrollWidth;
+        const markHeight = mark.scrollHeight;
+        if (!boxWidth || !boxHeight || !markWidth || !markHeight) return;
+        const requestedScale = Number.parseFloat(getComputedStyle(mark).getPropertyValue('--logo-scale')) || 1;
+        const measuredScale = Math.min(1, boxWidth / markWidth, boxHeight / markHeight);
+        const nextScale = Math.min(requestedScale, measuredScale < 1 ? measuredScale * 0.96 : 1);
+        mark.style.setProperty('--logo-fit-scale', String(Math.max(0.1, Math.floor(nextScale * 1000) / 1000)));
+      });
+    }
+
+    fitAsciiLogos();
+    window.addEventListener('load', fitAsciiLogos);
+  </script>
+</body>
+</html>
