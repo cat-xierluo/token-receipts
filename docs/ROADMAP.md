@@ -1,6 +1,6 @@
 # 项目路线图
 
-> Last updated: 2026-05-09
+> Last updated: 2026-05-10
 
 ## 项目愿景
 
@@ -13,9 +13,10 @@
 | 阶段一：基础功能 | HTML/终端收据生成 | ✅ 已完成 | |
 | 阶段二：热敏打印 | Epson TM-T88V 支持 | ✅ 已完成 | |
 | 阶段三：多模型支持 | 多供应商 + Transcript 直读 | ✅ 已完成 | 8 供应商、64 定价条目 |
-| 阶段四：发布与打磨 | NPM 发布、文档完善 | 🔄 进行中 | |
-| 阶段五：图片导出 | PNG/JPEG 导出 | ⏳ 未开始 | |
-| 阶段六：生态集成 | Opencode 插件 | ⏳ 未开始 | |
+| 阶段四：打印与汇总 | 喵喵机 BLE + 日报/月报 + Codex | ✅ 已完成 | |
+| 阶段五：发布与打磨 | NPM 发布、文档完善 | 🔄 进行中 | |
+| 阶段六：图片导出 | PNG/JPEG 导出 | ⏳ 未开始 | |
+| 阶段七：生态集成 | Opencode 插件 | ⏳ 未开始 | |
 
 ## 任务详情
 
@@ -39,7 +40,17 @@
 - [x] 自动保存到桌面/下载文件夹
 - [x] 统一模型名称映射
 
-### 阶段四：发布与打磨 🔄
+### 阶段四：打印与汇总 ✅
+
+- [x] 喵喵机 BLE 蓝牙打印（MXW01 热敏打印机）
+- [x] Codex CLI 会话解析（OpenAI Codex）
+- [x] Codex 归档会话扫描（`~/.codex/archived_sessions/`）
+- [x] 日报汇总（`daily` 命令）
+- [x] 月报汇总（`monthly` 命令）
+- [x] 多币种统一换算为 CNY（实时汇率 + 24h 缓存）
+- [x] 喵喵机打印布局优化（网址重复、session 溢出、日期截断等修复）
+
+### 阶段五：发布与打磨 🔄
 
 - [ ] NPM 发布（`token-receipts` v2.0.0）
   - [ ] 确认 npm 账号和包名可用
@@ -51,16 +62,26 @@
 - [ ] 清理 docs/status 目录结构（已完成）
 - [ ] 推送到 GitHub 远程
 
-### 阶段五：图片导出 ⏳
+### 阶段六：图片导出 ⏳
 
 - [ ] PNG 导出
 - [ ] JPEG 导出
 
-### 阶段六：生态集成 ⏳
+### 阶段七：生态集成 ⏳
 
 - [ ] Opencode 插件支持
 
 ## 进度日志
+
+- **2026-05-10**
+  - 新增喵喵机 BLE 蓝牙打印（MXW01 热敏打印机）
+  - 新增 Codex CLI 会话解析 + 归档会话扫描（`~/.codex/archived_sessions/`）
+  - 新增日报（`daily`）和月报（`monthly`）命令
+  - 多币种统一换算：USD 费用按实时汇率换算为 CNY，显示统一 total（frankfurter.app + 24h 本地缓存）
+  - 修复喵喵机打印布局问题（网址重复、session 溢出、日期截断、名言间距不一致）
+  - 日报/月报模型按费用降序排列
+  - 统一 ASCII logo 渲染来源：`src/utils/ascii-art.ts` 负责 logo 源数据和缩放参数，所有输出共用
+  - 将 `docs/ascii-logo-preview.html` 改为由 `npm run preview:logos` 生成
 
 - **2026-05-09**
   - 新增 `docs/ascii-logo-preview.html`：集中预览 7 家供应商和 unknown fallback 的 ASCII logo 及收据头部效果

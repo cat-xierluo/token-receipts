@@ -1,8 +1,37 @@
 # 决策记录
 
-> Last updated: 2026-05-09
+> Last updated: 2026-05-10
 
 ## 决策记录
+
+### [DEC-006] - 2026-05-10 - ASCII Logo 渲染改为单一来源和自动适配盒
+
+**背景**
+
+预览页、HTML 收据和热敏截图曾分别维护 logo 数据或展示尺寸，导致同一 provider 在预览和最终页面里的观感不一致。高颗粒度 ASCII logo 还会因为行数或列数较多，把收据头部撑得过高。
+
+**选项**
+
+1. 继续手工同步预览页和 HTML 样式 - 改动快，但后续很容易再次漂移
+2. 为每个 provider 继续写固定 CSS class - 可控，但新增或改 logo 时需要同时改多处
+3. 让 `ascii-art.ts` 输出 logo 源数据和渲染参数，所有页面只消费同一份结果 - 改动集中，预览和最终输出一致
+
+**决策**
+
+采用选项 3。`ascii-art.ts` 新增固定 logo 展示盒和 `getLogoRenderData()`，根据字符稿宽度、行数和 provider 行高计算整体缩放参数；HTML 收据、PNG 导出、热敏截图和预览页都使用这套数据。预览页改为通过 `npm run preview:logos` 从构建产物生成。
+
+**理由**
+
+logo 还原和页面排版应该分层处理：字符稿只负责形态，渲染函数负责把它压进 Claude 默认头图区。这样可以继续提高 OpenAI/Qwen/MiniMax 等复杂图形的细节，同时保证最终页面不被撑开。
+
+**影响**
+
+- `src/utils/ascii-art.ts` 成为 logo 源数据和渲染参数的单一来源
+- `HtmlRenderer` 不再维护 provider 专属 logo CSS class
+- `docs/ascii-logo-preview.html` 由脚本生成，不再手工复制 logo
+- PNG 导出继承 HTML 收据的固定区域；热敏截图也限制 logo 宽度和高度
+
+---
 
 ### [DEC-005] - 2026-05-09 - ASCII Logo 还原优先，展示层压缩
 
@@ -129,6 +158,34 @@ HTML 收据页中的 `Share Publicly` 按钮会把收据数据上传到 `https:/
 ---
 
 ## 工作日志
+
+### 2026-05-10 22:00 (Claude)
+
+- **目标**：完善日报/月报功能，修复喵喵机打印布局
+- **操作**：
+  - 新增喵喵机 BLE 蓝牙打印（`MiaoMiaoJiRenderer`，通过 `@stoprocent/noble` + `mxw01-thermal-printer`）
+  - 新增 Codex CLI 会话解析（`CodexDataFetcher` + `CodexParser`）
+  - 新增 Codex 归档会话扫描（`CodexDiscoverer` 扫描 `archived_sessions/`）
+  - 新增日报/月报命令（`daily` / `monthly`），汇总多会话 token 用量和费用
+  - 多币种统一换算：新增 `exchange-rate.ts`，通过 frankfurter.app API 获取实时 USD→CNY 汇率，24h 本地缓存，日报/月报 total 统一为 CNY
+  - 纯 CNY 模型日不显示汇率附注
+  - 日报/月报模型按费用降序排列
+  - 修复喵喵机打印：网址重复显示、session 名溢出、日期截断、名言前后间距不一致
+- **结果**：日报/月报功能完整，支持 HTML/console/BLE 输出；喵喵机打印布局稳定
+- **下一步**：NPM 发布、图片导出（PNG/JPEG）
+
+### 2026-05-10 12:37 (Codex)
+
+- **目标**：排查 ASCII logo 在预览页、HTML 和图片导出中的显示不一致，并统一展示区域
+- **操作**：
+  - 把 logo 固定展示盒、行高和整体缩放参数集中到 `src/utils/ascii-art.ts`
+  - 将 HTML 收据头部改为消费 `getLogoRenderData()`，移除 provider 专属 CSS class
+  - HTML/预览页改用专用 display mark：Claude 在本地图形宽度内居中，其他 provider 保留原始内部空格；页面加载和保存 PNG 前都会测量后缩放
+  - 新增 `scripts/generate-ascii-logo-preview.mjs` 和 `npm run preview:logos`，用源码生成预览页
+  - 调整热敏截图 CSS，限制 logo 在收据宽度内并保持 120px 高度
+  - 生成预览页截图和 OpenAI/Qwen/Kimi/Claude 真实收据截图检查布局
+- **结果**：预览页和最终 HTML/PNG 使用同一套 logo 数据与缩放规则，复杂 ASCII logo 会被压进固定区域，不再撑开收据头部
+- **下一步**：后续如继续优化某个图形，只改 `src/utils/ascii-art.ts` 并重新运行 `npm run preview:logos`
 
 ### 2026-05-09 23:21 (Codex)
 
