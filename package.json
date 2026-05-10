@@ -1,6 +1,6 @@
 {
   "name": "token-receipts",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Thermal-receipt style usage reports for AI coding sessions (Claude Code, OpenAI Codex CLI). Multi-model pricing, dual currency, BLE thermal printing.",
   "license": "MIT",
   "author": "Chris Hutchinson <github.com/chrishutchinson>",

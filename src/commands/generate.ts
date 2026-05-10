@@ -274,11 +274,11 @@ export class GenerateCommand {
    */
   private getAutoSavePath(fileName: string): string | null {
     const home = homedir();
-    const desktop = `${home}/Desktop`;
     const downloads = `${home}/Downloads`;
+    const desktop = `${home}/Desktop`;
 
-    if (existsSync(desktop)) return `${desktop}/${fileName}.html`;
     if (existsSync(downloads)) return `${downloads}/${fileName}.html`;
+    if (existsSync(desktop)) return `${desktop}/${fileName}.html`;
     return null;
   }
 
