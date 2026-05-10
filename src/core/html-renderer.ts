@@ -6,7 +6,7 @@ import {
   formatDateTime,
   formatDuration,
 } from "../utils/formatting.js";
-import { getHeader } from "../utils/ascii-art.js";
+import { getLogoRenderData } from "../utils/ascii-art.js";
 import {
   getDisplayName,
   getProvider,
@@ -78,6 +78,7 @@ export class HtmlRenderer {
   async generateHtml(data: ReceiptData, receiptText: string): Promise<string> {
     const exportData = this.getExportData(data);
     const mainProvider = this.getMainProvider(data);
+    const logo = getLogoRenderData(mainProvider);
     const quote = getRandomQuote();
 
     return `<!DOCTYPE html>
@@ -95,13 +96,15 @@ ${this.sharedCss()}
     <div class="receipt">
       <div class="receipt-edge receipt-edge-top" id="edge-top"></div>
       <div class="header">
-        <div class="logo logo-${mainProvider}">${getHeader(mainProvider)}</div>
+        <div class="logo" style="${logo.style}">
+          <pre class="logo-mark">${this.escapeHtml(logo.display)}</pre>
+        </div>
         <div class="meta">
           <div class="meta-row">
             <div>Location</div><div class="dots">....................</div><div class="value">${this.escapeHtml(data.location)}</div>
           </div>
           <div class="meta-row">
-            <div>Session</div><div class="dots">....................</div><div class="value">${this.escapeHtml(data.transcriptData.sessionSlug)}</div>
+            <div>Session</div><div class="dots">....................</div><div class="value value-session">${this.escapeHtml(data.transcriptData.sessionSlug)}</div>
           </div>
           <div class="meta-row">
             <div>Date</div><div class="dots">....................</div><div class="value">${formatDateTime(data.transcriptData.endTime, data.config.timezone)}</div>
@@ -149,6 +152,23 @@ ${JSON.stringify(exportData, null, 2)}
   </script>
 
   <script>
+    function fitAsciiLogos() {
+      document.querySelectorAll('.logo').forEach((logo) => {
+        const mark = logo.querySelector('.logo-mark');
+        if (!mark) return;
+        mark.style.setProperty('--logo-fit-scale', '1');
+        const boxWidth = logo.clientWidth;
+        const boxHeight = logo.clientHeight;
+        const markWidth = mark.scrollWidth;
+        const markHeight = mark.scrollHeight;
+        if (!boxWidth || !boxHeight || !markWidth || !markHeight) return;
+        const requestedScale = Number.parseFloat(getComputedStyle(mark).getPropertyValue('--logo-scale')) || 1;
+        const measuredScale = Math.min(1, boxWidth / markWidth, boxHeight / markHeight);
+        const nextScale = Math.min(requestedScale, measuredScale < 1 ? measuredScale * 0.96 : 1);
+        mark.style.setProperty('--logo-fit-scale', String(Math.max(0.1, Math.floor(nextScale * 1000) / 1000)));
+      });
+    }
+
     // Generate piano-key stripes for receipt edges
     function fillEdgeStripes(el, offset) {
       if (!el) return;
@@ -160,6 +180,8 @@ ${JSON.stringify(exportData, null, 2)}
     }
     fillEdgeStripes(document.getElementById('edge-top'), 0);
     fillEdgeStripes(document.getElementById('edge-bottom'), 10);
+    fitAsciiLogos();
+    window.addEventListener('load', fitAsciiLogos);
 
     // Add keyboard shortcut to close window
     document.addEventListener('keydown', (e) => {
@@ -184,6 +206,7 @@ ${JSON.stringify(exportData, null, 2)}
       btnText.textContent = 'Saving...';
 
       try {
+        fitAsciiLogos();
         const receipt = document.querySelector('.receipt');
         const dataUrl = await htmlToImage.toPng(receipt, {
           quality: 1,
@@ -307,7 +330,7 @@ ${JSON.stringify(exportData, null, 2)}
    */
   async generateDailyHtml(data: DailySummaryData): Promise<string> {
     const { summary, location, config } = data;
-    const logo = getHeader("anthropic");
+    const logo = getLogoRenderData("anthropic");
     const [y, m, d] = summary.date.split("-").map(Number);
     const dayStart = new Date(y, m - 1, d);
     const isToday = summary.date === new Date().toISOString().slice(0, 10);
@@ -332,7 +355,9 @@ ${this.sharedCss()}
     <div class="receipt">
       <div class="receipt-edge receipt-edge-top" id="edge-top"></div>
       <div class="header">
-        <div class="logo logo-anthropic">${logo}</div>
+        <div class="logo" style="${logo.style}">
+          <pre class="logo-mark">${this.escapeHtml(logo.display)}</pre>
+        </div>
         <div style="text-align:center; margin-top:10px;">
           <div style="font-size:18px; font-weight:bold; letter-spacing:2px;">DAILY SUMMARY</div>
           <div style="font-size:14px; margin-top:5px;">${dateDisplay}</div>
@@ -385,6 +410,23 @@ ${this.sharedCss()}
   </div>
 
   <script>
+    function fitAsciiLogos() {
+      document.querySelectorAll('.logo').forEach((logo) => {
+        const mark = logo.querySelector('.logo-mark');
+        if (!mark) return;
+        mark.style.setProperty('--logo-fit-scale', '1');
+        const boxWidth = logo.clientWidth;
+        const boxHeight = logo.clientHeight;
+        const markWidth = mark.scrollWidth;
+        const markHeight = mark.scrollHeight;
+        if (!boxWidth || !boxHeight || !markWidth || !markHeight) return;
+        const requestedScale = Number.parseFloat(getComputedStyle(mark).getPropertyValue('--logo-scale')) || 1;
+        const measuredScale = Math.min(1, boxWidth / markWidth, boxHeight / markHeight);
+        const nextScale = Math.min(requestedScale, measuredScale < 1 ? measuredScale * 0.96 : 1);
+        mark.style.setProperty('--logo-fit-scale', String(Math.max(0.1, Math.floor(nextScale * 1000) / 1000)));
+      });
+    }
+
     function fillEdgeStripes(el, offset) {
       if (!el) return;
       let html = '';
@@ -395,6 +437,8 @@ ${this.sharedCss()}
     }
     fillEdgeStripes(document.getElementById('edge-top'), 0);
     fillEdgeStripes(document.getElementById('edge-bottom'), 10);
+    fitAsciiLogos();
+    window.addEventListener('load', fitAsciiLogos);
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') window.close();
@@ -415,6 +459,7 @@ ${this.sharedCss()}
       btnText.textContent = 'Saving...';
 
       try {
+        fitAsciiLogos();
         const receipt = document.querySelector('.receipt');
         const dataUrl = await htmlToImage.toPng(receipt, {
           quality: 1,
@@ -514,48 +559,23 @@ ${this.sharedCss()}
       width: 35ch;
       height: 120px;
       overflow: hidden;
-      font-size: var(--logo-font-size);
-      line-height: var(--logo-line-height);
       font-weight: bold;
-      white-space: pre;
       display: flex;
       align-items: center;
       justify-content: center;
       margin: 10px auto;
       text-align: left;
-      transform: scale(var(--logo-scale));
+    }
+
+    .logo .logo-mark {
+      margin: 0;
+      font: inherit;
+      font-size: var(--logo-font-size);
+      line-height: var(--logo-line-height);
+      white-space: pre;
+      flex: 0 0 auto;
+      transform: scale(var(--logo-fit-scale, var(--logo-scale)));
       transform-origin: center;
-    }
-
-    .logo-openai {
-      --logo-font-size: 20px;
-      --logo-line-height: 1.2;
-      --logo-scale: 0.45;
-    }
-
-    .logo-deepseek {
-      --logo-font-size: 8px;
-      --logo-line-height: 0.82;
-    }
-
-    .logo-minimax {
-      --logo-font-size: 7px;
-      --logo-line-height: 0.78;
-    }
-
-    .logo-glm {
-      --logo-font-size: 8.5px;
-      --logo-line-height: 0.84;
-    }
-
-    .logo-qwen {
-      --logo-font-size: 6.2px;
-      --logo-line-height: 0.70;
-    }
-
-    .logo-kimi {
-      --logo-font-size: 8px;
-      --logo-line-height: 0.72;
     }
 
     .separator {
@@ -604,7 +624,7 @@ ${this.sharedCss()}
       color: #666;
     }
 
-    .footer-message { margin: 25px 0; color: #333; }
+    .footer-message { margin: 30px 0; color: #333; }
 
     .meta {
       margin: 10px 0;
@@ -623,9 +643,9 @@ ${this.sharedCss()}
 
     .meta .dots { overflow: hidden; text-wrap: auto; height: 1rem; }
     .meta .value { text-align: right; }
+    .meta .value-session { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
 
     .generated-by {
-      margin-top: 25px;
       padding-top: 25px;
       border-top: 1px dashed #999;
     }

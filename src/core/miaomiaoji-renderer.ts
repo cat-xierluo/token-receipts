@@ -34,9 +34,14 @@ const PRINT_CSS = `<style>
     font-weight: bold !important;
   }
   .logo {
-    --logo-font-size: 16px !important;
-    height: auto !important;
+    width: 100% !important;
+    max-width: 35ch !important;
+    height: 120px !important;
     margin-bottom: 8px !important;
+  }
+  .logo-mark {
+    font-size: var(--logo-font-size) !important;
+    line-height: var(--logo-line-height) !important;
   }
   .receipt-edge {
     position: static !important;
@@ -57,7 +62,8 @@ const PRINT_CSS = `<style>
   .generated-by {
     font-size: 15px !important;
     text-align: center !important;
-    margin-top: 28px !important;
+    margin-top: 0 !important;
+    margin-bottom: 20px !important;
     padding-top: 16px !important;
   }
   .generated-by a { font-size: 15px !important; }
@@ -67,6 +73,7 @@ const PRINT_CSS = `<style>
     line-height: 1.6 !important;
   }
   .meta .value { font-weight: bold !important; }
+  .meta .value-session { overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; max-width: 180px !important; }
   .total { font-size: 22px !important; }
 </style>`;
 
@@ -88,18 +95,18 @@ export class MiaoMiaoJiRenderer {
       /(<div class="footer-message">)([^<]*)( — )([^<]*)(<\/div>)/g,
       "$1$2<br>— $4$5",
     );
-    // Extract generated-by and move it before receipt-edge-bottom, then remove qr-section
+    // Move generated-by out of footer, insert before receipt-edge-bottom with spacing
     const genByMatch = html.match(
-      /(<div class="generated-by">[\s\S]*?<\/div>)\s*<\/div>/,
+      /(<div class="generated-by">[\s\S]*?<\/div>)/,
     );
     if (genByMatch) {
-      // Insert generated-by before the HTML receipt-edge-bottom element (identified by id)
+      // Remove generated-by from its original position in footer
+      html = html.replace(genByMatch[1], "");
+      // Insert generated-by before the bottom receipt edge with extra spacing
       html = html.replace(
         /(<div class="receipt-edge receipt-edge-bottom" id="edge-bottom")/,
-        genByMatch[1] + "\n$1",
+        `<div style="height:20px"></div>\n${genByMatch[1]}\n$1`,
       );
-      // Remove the entire qr-section div (including img and old generated-by)
-      html = html.replace(/<div class="qr-section">[\s\S]*?<\/div>\s*<\/div>/, "");
     }
     const imageData = await this.htmlToImageData(html);
     await this.sendToPrinter(imageData);
