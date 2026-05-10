@@ -65,6 +65,7 @@
 - **2026-05-09**
   - 新增 `docs/ascii-logo-preview.html`：集中预览 7 家供应商和 unknown fallback 的 ASCII logo 及收据头部效果
   - 调整 ASCII logo 颗粒度和页面缩放：保留高还原度字符稿，同时把 HTML 展示区域压缩到接近 Claude 默认 logo 的尺寸
+  - 细化 OpenAI/Kimi/Z.ai ASCII：OpenAI 强化交叠环形层次，Kimi 按 K-only 官方图形重画，Z.ai/GLM 改为规整阶梯式 Z
   - 移除公开分享页面：删除指向原项目服务的 Share Publicly 入口、远端上传脚本和 Cloudflare Worker 分享页代码，保留本地 HTML/PNG/打印输出
   - 规范化供应商 ASCII logo：保留 Claude 官方风格图标，OpenAI/DeepSeek/Z.ai/MiniMax/Qwen/Kimi 改为基于官方图形标识的单色抽象，并让 HTML/终端复用同一 logo 注册表
   - 扩展模型支持至 64 个定价条目（新增 GLM-5/4.7/4.5、MiniMax M2/M2.5、Qwen3、Kimi K2.5/K2 等）

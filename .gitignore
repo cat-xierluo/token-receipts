@@ -4,3 +4,13 @@ dist/
 .DS_Store
 .env
 *.tsbuildinfo
+
+# Dev tools
+.claude/
+.playwright-mcp/
+
+# Preview screenshots
+*.png
+
+# Dev docs
+docs/archive/
