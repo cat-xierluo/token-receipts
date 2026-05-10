@@ -29,6 +29,8 @@ export interface DailySummary {
   totalUserMessages: number;
   totalAssistantMessages: number;
   allModelsUsed: string[];
+  totalCostCNY: number;
+  exchangeRate: number;
 }
 
 export interface DailySummaryData {

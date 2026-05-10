@@ -10,6 +10,7 @@ import { ConfigManager } from "../core/config-manager.js";
 import { LocationDetector } from "../utils/location.js";
 import { getCurrencySymbol } from "../utils/model-pricing.js";
 import { formatCurrency } from "../utils/formatting.js";
+import { getUsdCnyRate } from "../utils/exchange-rate.js";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -54,7 +55,8 @@ export class DailyCommand {
     console.log(chalk.gray(`  Found ${parts.join(" · ")}`));
 
     const aggregator = new DailyAggregator();
-    const summary = await aggregator.aggregate(files, targetDate);
+    const exchangeRate = await getUsdCnyRate();
+    const summary = await aggregator.aggregate(files, targetDate, exchangeRate);
 
     const locationDetector = new LocationDetector();
     const location =
@@ -74,7 +76,7 @@ export class DailyCommand {
         console.log("");
         console.log(
           chalk.green(
-            `${summary.sessionCount} sessions, ${formatCurrency(summary.totalCost, totalSymbol)} total`,
+            `${summary.sessionCount} sessions, ${formatCurrency(summary.totalCostCNY, "¥")} total`,
           ),
         );
       }

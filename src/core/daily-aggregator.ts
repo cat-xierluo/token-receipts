@@ -1,4 +1,5 @@
 import { basename, dirname } from "node:path";
+import { getModelPrice } from "../utils/model-pricing.js";
 import type { ModelUsageSummary } from "../types/transcript.js";
 import type {
   DailySummary,
@@ -12,7 +13,7 @@ export class DailyAggregator {
   private claudeParser = new TranscriptParser();
   private codexParser = new CodexParser();
 
-  async aggregate(filePaths: string[], targetDate: string): Promise<DailySummary> {
+  async aggregate(filePaths: string[], targetDate: string, exchangeRate: number = 7.25): Promise<DailySummary> {
     const sessions: DailySessionEntry[] = [];
     const modelMap = new Map<string, ModelUsageSummary>();
 
@@ -62,6 +63,13 @@ export class DailyAggregator {
     );
 
     const totalCost = modelSummaries.reduce((s, m) => s + m.estimatedCost, 0);
+
+    // Convert all costs to CNY for unified total
+    const totalCostCNY = modelSummaries.reduce((s, m) => {
+      const pricing = getModelPrice(m.modelName);
+      const isUsd = pricing?.currency === "USD";
+      return s + (isUsd ? m.estimatedCost * exchangeRate : m.estimatedCost);
+    }, 0);
     const totalTokens = modelSummaries.reduce((s, m) => s + m.totalTokens, 0);
     const totalInputTokens = modelSummaries.reduce(
       (s, m) => s + m.inputTokens,
@@ -115,6 +123,8 @@ export class DailyAggregator {
       totalUserMessages: sessions.length,
       totalAssistantMessages: sessions.length,
       allModelsUsed: [...new Set(sessions.flatMap((s) => s.modelsUsed))],
+      totalCostCNY,
+      exchangeRate,
     };
   }
 

@@ -382,8 +382,9 @@ ${this.sharedCss()}
       <div class="total-section">
         <div class="total">
           <span>TOTAL</span>
-          <span>${formatCurrency(summary.totalCost, getCurrencySymbol(summary.allModelsUsed[0] ?? ""))}</span>
+          <span>${formatCurrency(summary.totalCostCNY, "¥")}</span>
         </div>
+        ${summary.exchangeRate ? `<div class="exchange-rate-note">(USD→CNY: ${summary.exchangeRate.toFixed(2)})</div>` : ""}
       </div>
 
       <div class="footer">
@@ -614,6 +615,13 @@ ${this.sharedCss()}
       display: flex;
       justify-content: space-between;
       margin: 10px 0;
+    }
+
+    .exchange-rate-note {
+      text-align: center;
+      color: #999;
+      font-size: 0.85em;
+      margin-top: 4px;
     }
 
     .footer {

@@ -333,12 +333,16 @@ export class ReceiptGenerator {
       lines.push("");
     }
 
-    // Totals
-    const totalSymbol = getCurrencySymbol(summary.allModelsUsed[0] ?? "");
+    // Totals — unified CNY
     lines.push(SEPARATOR);
     lines.push(
-      this.padLine("TOTAL", "", formatCurrency(summary.totalCost, totalSymbol)),
+      this.padLine("TOTAL", "", formatCurrency(summary.totalCostCNY, "¥")),
     );
+    if (summary.exchangeRate) {
+      lines.push(
+        this.centerText(`(USD→CNY: ${summary.exchangeRate.toFixed(2)})`, 35),
+      );
+    }
     lines.push(SEPARATOR);
     lines.push("");
 
