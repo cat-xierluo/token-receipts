@@ -14,6 +14,8 @@ import { ReceiptGenerator } from "../core/receipt-generator.js";
 import { HtmlRenderer } from "../core/html-renderer.js";
 import { ThermalPrinterRenderer } from "../core/thermal-printer.js";
 import { MiaoMiaoJiRenderer } from "../core/miaomiaoji-renderer.js";
+import { TypewriterVideoRenderer } from "../core/typewriter-video-renderer.js";
+import { LivePhotoAssembler } from "../core/live-photo-assembler.js";
 import { ConfigManager } from "../core/config-manager.js";
 import { LocationDetector } from "../utils/location.js";
 import type { SessionEndHookData } from "../types/session-hook.js";
@@ -21,7 +23,7 @@ import type { ReceiptData } from "../core/receipt-generator.js";
 
 const execAsync = promisify(exec);
 
-export type OutputFormat = "html" | "console" | "printer" | "bt";
+export type OutputFormat = "html" | "console" | "printer" | "bt" | "livephoto" | "video" | "gif";
 
 export interface GenerateOptions {
   session?: string;
@@ -39,6 +41,8 @@ export class GenerateCommand {
   private htmlRenderer = new HtmlRenderer();
   private thermalPrinter = new ThermalPrinterRenderer();
   private miaomiaojiRenderer = new MiaoMiaoJiRenderer();
+  private videoRenderer = new TypewriterVideoRenderer();
+  private livePhotoAssembler = new LivePhotoAssembler();
   private configManager = new ConfigManager();
   private locationDetector = new LocationDetector();
 
@@ -169,6 +173,11 @@ export class GenerateCommand {
             case "bt":
               await this.outputToBt(receiptData, options, config as unknown as Record<string, unknown>, spinner);
               break;
+            case "livephoto":
+            case "video":
+            case "gif":
+              await this.outputToVideo(receiptData, format, transcriptData.sessionSlug || actualSessionId || sessionData.sessionId, spinner);
+              break;
           }
         } catch (err) {
           const error =
@@ -199,6 +208,44 @@ export class GenerateCommand {
       }
 
       process.exit(1);
+    }
+  }
+
+  /**
+   * Export receipt as video (Live Photo, MP4, or GIF) with typewriter animation
+   */
+  private async outputToVideo(
+    receiptData: ReceiptData,
+    format: "livephoto" | "video" | "gif",
+    sessionId: string,
+    spinner: ReturnType<typeof ora>,
+  ): Promise<void> {
+    spinner.start("Rendering typewriter animation...");
+
+    const renderResult = await this.videoRenderer.render(receiptData, { format });
+
+    spinner.text = "Assembling video...";
+
+    const outputDir = `${homedir()}/Downloads`;
+    const basename = this.sanitizeFileName(
+      `${sessionId}-${format === "livephoto" ? "livephoto" : format}`,
+    );
+
+    const result = await this.livePhotoAssembler.assemble({
+      framesDir: (renderResult as any)._framesDir,
+      frameCount: (renderResult as any)._frameCount,
+      stillPath: renderResult.stillPath,
+      outputDir,
+      basename,
+      format,
+      fps: 24,
+      tmpDir: (renderResult as any)._tmpDir,
+    });
+
+    spinner.succeed(`${format} exported!`);
+    console.log(chalk.green(`  Video: ${result.videoPath}`));
+    if (result.stillPath) {
+      console.log(chalk.green(`  Cover: ${result.stillPath}`));
     }
   }
 
